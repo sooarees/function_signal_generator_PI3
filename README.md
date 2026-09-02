@@ -1,39 +1,27 @@
-# Nome do projeto
+# Gerador de Função Microcontrolado
 
-**(Adicionar abaixo UM parágrafo com visão geral do projeto.)**
+Esse projeto consiste em um gerador de funções capaz de gerar diferentes tipos de onda, com controle de parâmetros através de um display touch conectado a um microcontrolador. O desenvolvimento foi divido em quatro etapas:
 
-Esse projeto é um sistema de controle de motor de passo... O desenvolvimento foi divido em quatro etapas:
-
-- Etapa 1 (data da entrega): (breve descrição da etapa)
-- Etapa 2 (data da entrega): (breve descrição da etapa)
-- Etapa 3 (data da entrega): (breve descrição da etapa)
-- Etapa 4 (data da entrega): (breve descrição da etapa)
-
-**(Exemplo com os links dos READMEs das etapas:)**
-
-- [Etapa 1](./etapa_1/README.md) (02/04/2026): Pesquisa, planejamento e outline do projeto.
-- [Etapa 2](./etapa_2/README.md) (30/04/2026): Teste dos módulos e desenvolvimento de protótipo.
-- [Etapa 3](./etapa_3/README.md) (28/05/2026): Desenvolvimento do produto.
-- [Etapa 4](./etapa_4/README.md) (09/07/2026): Implementação e análise de desempenho.
-
+- [Etapa 1](./etapa_1/README.md) (03/08/2026): (Pesquisa e estruturação do projeto, definição de parâmetros e escolha dos principais componentes.)
+- [Etapa 2](./etapa_2/README.md) (30/04/2026)(data da entrega): (Testes em protoboard e desenvolvimento da interface básica)
+- [Etapa 3](./etapa_3/README.md) (data da entrega): (Protõtipo desenvolvido em PCI com case)
+- [Etapa 4](./etapa_4/README.md) (data da entrega): (Produto final com interface integrada e case definitivo)
 
 ## Requisitos
 
-**(Adicionar aqui os requisitos de hardware e software.)**
-
 Este projeto foi implementado com os seguintes módulos/softwares/hardwares:
 
-- Sensor de temperatura PT100 com 3 fios.
-- Sensor de corrente de efeito Hall LEM LA 205-S.
-- Espressif IoT Development Framework (esp idf).
+- Digital-to-Analog Converter (DAC0808)
+- Display Touch (?)
+- Visual Studio Code.
 - Microcontrolador STM32F401.
 
 
 ## Visão geral
 
-**(Adicionar aqui diagrama de blocos com UM parágrafo de explicação resumida de cada bloco (Ex.: 1 linha cada bloco).)**
+<img src="./images/Block_Diagram.jpeg" alt="Diagrama de blocos" width="700">
 
-**A figura deve estar com um tamanho adequado para melhorar a apresentação da página inicial do projeto.**
+**(Adicionar aqui UM parágrafo de explicação resumida de cada bloco (Ex.: 1 linha cada bloco).)**
 
 ## Protótipo
 
