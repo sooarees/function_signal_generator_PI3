@@ -19,7 +19,7 @@ Este projeto foi implementado com os seguintes módulos/softwares/hardwares:
 
 ## Visão geral
 
-<img src="./images/Block_Diagram.jpeg" alt="Diagrama de blocos" width="700">
+![Diagrama de blocos](./images/diagrama-blocos-simplificado.svg)
 
 **(Adicionar aqui UM parágrafo de explicação resumida de cada bloco (Ex.: 1 linha cada bloco).)**
 
