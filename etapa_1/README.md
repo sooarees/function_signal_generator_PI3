@@ -41,7 +41,7 @@ O STM32G474 provavelmente atenderia ao requisito básico, assim como o RP2040 é
 
 A implementação prevista parte de um temporizador acionando transferências das amostras por DMA para o GPIO ligado ao DAC0808. Os oito bits deverão, preferencialmente, ocupar uma única porta GPIO. Ainda será necessário verificar a rota entre temporizador, controlador DMA, barramento e porta escolhida, definir os pinos e validar experimentalmente os 5 MS/s. O fluxo pretendido é: **tabela de amostras → DMA → GPIO → DAC0808 → condicionamento analógico → saída**.
 
-![Diagrama de blocos simplificado](../images/diagrama-blocos-simplificado.svg)
+<img src="../images/diagrama-blocos-simplificado.svg" alt="Diagrama de blocos simplificado" width="560">
 
 ## Testes
 
