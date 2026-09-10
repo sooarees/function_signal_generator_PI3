@@ -27,7 +27,7 @@ Na imagem a seguir é possível visualizar o Diagrama de Blocos do circuito.
 
 | Microcontrolador | 3 DACs | Settling Time | DMA | Avaliação |
 | :--- | :---: | :---: | :---: | :--- |
-| **ESP32** | Apenas 2 | Não | Sim | Descartado. Sem necessidade de rede; e alto settling time |
+| **ESP32** | Apenas 2 | Não | Sim | Descartado. Sem necessidade de rede e alto settling time |
 | **Raspberry Pi RP2350** | Não possui | Não | Sim | Descartado. Exigiria DAC externo. |
 | **MSP430** | Sim | Sim | Não | Descartado. Falta de DMA e frequência baixa (24MHz) para a taxa de atualização necessária (200kHz). |
 | **STM32G474** | Sim | Sim | Sim | Selecionado. |
