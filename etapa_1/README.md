@@ -1,7 +1,7 @@
 # Etapa 01
 
 ## Estrutura do Circuito
-Para gerar as formas de onda, será utilizado um DAC interno de um MCU, portanto, não haverá uma topologia analógica para gerar os sinais. Desse modo, os blocos analógicos se resumem ao estágio de amplificação e ao de offset. Na imagem a seguir é possível visualizar o Diagrama de Blocos do circuito.
+Para gerar as formas de onda, será utilizado um DAC interno de um MCU, portanto, não haverá uma topologia analógica para gerar os sinais. Desse modo, os blocos analógicos se resumem ao estágio de amplificação, offset e filtragem. Na imagem a seguir é possível visualizar o Diagrama de Blocos do circuito.
 ![Diagrama de Blocos](../images/DiagramaDeBlocos_Etapa01.png)
 
 **Descrição:**
