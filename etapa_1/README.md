@@ -33,15 +33,13 @@ Apesar de o ILI9341 aceitar diferentes interfaces, o módulo de referência ser�
 
 | Critério | ATmega | dsPIC33CK | MSP430FR2355 | ESP32-S3 | RP2350 | **STM32G474** |
 |:--|:-:|:-:|:-:|:-:|:-:|:-:|
-| **C1** — ≥ 3 canais D/A | Não `0` | Sim `3` | Sim `4`¹ | Não `0` | Não `0` | Sim **`7`** |
+| **C1** — ≥ 3 canais D/A | Não `0` | Sim `3` | Sim `4` | Não `0` | Não `0` | Sim **`7`** |
 | **C2** — Settling < 5 µs | Não | Sim | Sim | Não | Não | Sim **`3 µs`** |
 | **C3** — DMA ≥ 200 kSPS | Não | Sim | Não | Sim | Sim | Sim |
 | **C4** — LCD paralelo 8 bits | Não | Sim | Sim | Sim | Sim | Sim |
 | **C5** — ADC/GPIO touchscreen | Parcial | Sim | Sim | Parcial | Sim | Sim |
 | **C6** — Baixo consumo | Sim | Sim | Sim | Sim | Sim | Sim |
 | **Aprovações** | `1/6` | **`6/6`** | `5/6` | `4/6` | `4/6` | **`6/6`** |
-
-Com base nos critérios estabelecidos, três candidatos caem logo na primeira linha por não terem conversor interno algum: **ATmega**, **ESP32-S3** e **RP2350**. O **MSP430FR2355** atende a quatro dos cinco critérios e seria competitivo, mas não possui controlador de DMA, o que reprova diretamente o requisito de atualização contínua e obrigaria a CPU a escrever cada amostra, introduzindo irregularidade nos instantes de envio. Restam **dsPIC33CK** e **STM32G474**, ambos aprovados nos cinco critérios. A decisão entre eles passa a ser por margem, não por eliminação: o **STM32G474** oferece sete canais de conversão contra três, seis amplificadores contra três, sete comparadores contra quatro, e 128 kB de memória contra 24 kB. Sua acomodação de 3 µs no pior caso já cumpre o requisito de 5 µs usando apenas os conversores bufferizados, e ainda reserva quatro canais rápidos de 125 ns caso a especificação seja apertada no futuro. Some-se a isso o temporizador de alta resolução de 184 ps para a onda retangular e uma referência de tensão interna, ambos ausentes ou inferiores no concorrente. O resultado prático é três componentes analógicos externos, contra oito nas opções sem periferia integrada.
 
 ### 3.3. Conclusão da Seleção
 O **STM32G474** foi selecionado por atender todos os requisitos apresentados.
