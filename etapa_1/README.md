@@ -23,6 +23,8 @@ Foi escolhido um módulo TFT touchscreen de 2,4", com resolução de 320 × 240 
 
 Apesar de o ILI9341 aceitar diferentes interfaces, o módulo de referência será utilizado em modo paralelo de 8 bits. A comunicação do LCD empregará as linhas de dados D0–D7 e os sinais de controle CS, RS/DC, WR, RD e RST. O touchscreen não utiliza SPI: suas quatro linhas serão alternadas entre GPIO e entradas ADC para medir as coordenadas do toque. Essa interface ocupa vários pinos do STM32G474 e, por isso, seu mapeamento deverá ser considerado junto aos DACs, OPAMPs e demais periféricos. O driver usado no projeto de referência poderá orientar o desenvolvimento, mas precisará ser adaptado do FRDM-K64F para o STM32G474.
 
+A escolha pelo barramento paralelo também considera a necessidade de uma interface responsiva. Como a tela deverá exibir menus, valores numéricos e possivelmente uma prévia gráfica do sinal configurado, a taxa de escrita no display influencia diretamente a experiência de uso. Em comparação com SPI, a interface paralela utiliza mais GPIOs, porém transfere um byte completo a cada pulso de escrita, reduzindo o tempo necessário para atualizar regiões da tela. No firmware, a interface gráfica ficará no loop principal, enquanto a geração da forma de onda será executada por temporizador, DMA e DAC. Assim, a atualização visual e a leitura do toque não devem interferir na temporização crítica da saída analógica.
+
 ## 3. Requisitos e Seleção do Microcontrolador (MCU)
 
 ### 3.1. Requisitos Técnicos
@@ -48,4 +50,4 @@ Apesar de o ILI9341 aceitar diferentes interfaces, o módulo de referência ser�
 | **Aprovações** | `2/7` | **`6/7`** | `6/7` | `5/7` | `5/7` | **`7/7`** |
 
 ### 3.3. Conclusão da Seleção
-O **STM32G474** foi selecionado por atender todos os requisitos apresentados.
+O **STM32G474** foi selecionado por atender todos os requisitos apresentados. Sua principal vantagem para este projeto é integrar, no mesmo microcontrolador, os recursos necessários para geração analógica e controle da interface. Os DACs internos reduzem a quantidade de componentes externos e simplificam a etapa de geração dos sinais. O DMA permite que as amostras sejam enviadas aos DACs com regularidade, sem depender de interrupções constantes da CPU. Além disso, a quantidade de GPIOs disponíveis nas versões adequadas do componente torna viável a ligação do display paralelo, do touch resistivo e dos sinais auxiliares do circuito. Dessa forma, o STM32G474 oferece uma solução equilibrada entre desempenho, integração e complexidade de implementação.
