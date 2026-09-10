@@ -15,16 +15,17 @@ O projeto prevê a utilização dos seguintes módulos, softwares e componentes:
 - DACs e amplificadores operacionais internos do STM32G474.
 - Display TFT touchscreen de 2,4", com controlador ILI9341 e resolução de 320 × 240 pixels.
 - Interface paralela de 8 bits para o LCD e leitura do touch resistivo por GPIO e ADC.
-- Estágio analógico externo para amplificação, offset, filtragem e adaptação da saída para 50 Ω.
+- Estágio analógico externo para amplificação, offset e filtragem.
 - Fontes HLK-PM12, XL6019 e LM2596.
-- Biblioteca gráfica LVGL e Visual Studio Code.
-
+- Biblioteca gráfica LVGL, Visual Studio Code, OnShape e KiCAD.
 
 ## Visão geral
 
-<img src="./images/DiagramaDeBlocos_Etapa01.png" alt="Diagrama de blocos" width="650">
-
 O STM32G474 será responsável pela geração dos sinais por meio de seus DACs internos, pelo ajuste dos parâmetros e pelo controle da interface. Os amplificadores e filtros realizarão o condicionamento do sinal, enquanto o display permitirá a interação com o usuário. A alimentação proveniente da rede elétrica será convertida nas tensões necessárias aos blocos digitais e analógicos do circuito.
+
+<div align="center">
+  <img src="./images/DiagramaDeBlocos_Etapa01.png" alt="Diagrama de blocos" width="650">
+</div>
 
 ## Protótipo
 
