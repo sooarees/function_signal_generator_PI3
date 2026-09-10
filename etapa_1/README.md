@@ -2,7 +2,10 @@
 
 ## Estrutura do Circuito
 Para gerar as formas de onda, será utilizado um DAC interno de um MCU, portanto, não haverá uma topologia analógica para gerar os sinais. Desse modo, os blocos analógicos se resumem ao estágio de amplificação, offset e filtragem. Na imagem a seguir é possível visualizar o Diagrama de Blocos do circuito.
-![Diagrama de Blocos](../images/DiagramaDeBlocos_Etapa01.png)
+
+<div align="center">
+  <img src="../images/DiagramaDeBlocos_Etapa01.png" alt="Diagrama de blocos" width="650">
+</div>
 
 **Descrição:**
 *   **STM32G474:** Microcontrolador responsável por gerar os pontos da onda e o sinal de offset via DAC, gerenciar o DMA e controlar a interface.
@@ -26,20 +29,23 @@ Apesar de o ILI9341 aceitar diferentes interfaces, o módulo de referência ser�
 *   Mínimo de 3 canais de DAC internos.
 *   Pelo menos um dos DACs com settling time menor do que 5us (para obter pelo menos 10 pontos por período em 20kHz).
 *   Controlador DMA para atualização contínua do DAC (mínimo de 200 kSPS).
-*   Interface paralela de 8 bits para o LCD e entradas ADC/GPIO para o touchscreen resistivo.
+*   Interface paralela de 8 bits para o LCD.
+*   ADC para o touchscreen resistivo.
 *   Suporte a modos de baixo consumo de energia.
+*   Disponibilidade em placas de desenvolvimento.
 
 ### 3.2. Análise Comparativa
 
 | Critério | ATmega | dsPIC33CK | MSP430FR2355 | ESP32-S3 | RP2350 | **STM32G474** |
 |:--|:-:|:-:|:-:|:-:|:-:|:-:|
-| **C1** — ≥ 3 canais D/A | Não `0` | Sim `3` | Sim `4` | Não `0` | Não `0` | Sim **`7`** |
-| **C2** — Settling < 5 µs | Não | Sim | Sim | Não | Não | Sim **`3 µs`** |
-| **C3** — DMA ≥ 200 kSPS | Não | Sim | Não | Sim | Sim | Sim |
+| **C1** — DAC | Não `0` | Sim `3` | Sim `4` | Não `0` | Não `0` | Sim **`7`** |
+| **C2** — Settling time | Não | Sim | Sim | Não | Não | Sim **`3 µs`** |
+| **C3** — DMA | Não | Sim | Não | Sim | Sim | Sim |
 | **C4** — LCD paralelo 8 bits | Não | Sim | Sim | Sim | Sim | Sim |
-| **C5** — ADC/GPIO touchscreen | Parcial | Sim | Sim | Parcial | Sim | Sim |
+| **C5** — ADC | Parcial | Sim | Sim | Parcial | Sim | Sim |
 | **C6** — Baixo consumo | Sim | Sim | Sim | Sim | Sim | Sim |
-| **Aprovações** | `1/6` | **`6/6`** | `5/6` | `4/6` | `4/6` | **`6/6`** |
+| **C7** — Kit de Desenvolvimento | Sim | Não | Sim | Sim | Sim | Sim |
+| **Aprovações** | `2/7` | **`6/7`** | `6/7` | `5/7` | `5/7` | **`7/7`** |
 
 ### 3.3. Conclusão da Seleção
 O **STM32G474** foi selecionado por atender todos os requisitos apresentados.
