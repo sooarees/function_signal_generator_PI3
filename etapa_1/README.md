@@ -31,14 +31,17 @@ Apesar de o ILI9341 aceitar diferentes interfaces, o módulo de referência ser�
 
 ### 3.2. Análise Comparativa
 
-| Microcontrolador | 3 DACs | Settling Time | DMA | Avaliação |
-| :--- | :---: | :---: | :---: | :--- |
-| **ESP32** | Apenas 2 | Não | Sim | Descartado. Sem necessidade de rede e alto settling time |
-| **Raspberry Pi RP2350** | Não possui | Não | Sim | Descartado. Exigiria DAC externo. |
-| **MSP430** | Sim | Sim | Não | Descartado. Falta de DMA e frequência baixa (24MHz) para a taxa de atualização necessária (200kHz). |
-| **STM32G474** | Sim | Sim | Sim | Selecionado. |
+| Critério | ATmega | dsPIC33CK | MSP430FR2355 | ESP32-S3 | RP2350 | **STM32G474** |
+|:--|:-:|:-:|:-:|:-:|:-:|:-:|
+| **C1** — ≥ 3 canais D/A | Não `0` | Sim `3` | Sim `4`¹ | Não `0` | Não `0` | Sim **`7`** |
+| **C2** — Settling < 5 µs | Não | Sim | Sim | Não | Não | Sim **`3 µs`** |
+| **C3** — DMA ≥ 200 kSPS | Não | Sim | Não | Sim | Sim | Sim |
+| **C4** — LCD paralelo 8 bits | Não | Sim | Sim | Sim | Sim | Sim |
+| **C5** — ADC/GPIO touchscreen | Parcial | Sim | Sim | Parcial | Sim | Sim |
+| **C6** — Baixo consumo | Sim | Sim | Sim | Sim | Sim | Sim |
+| **Aprovações** | `1/6` | **`6/6`** | `5/6` | `4/6` | `4/6` | **`6/6`** |
 
-Com base nos critérios estabelecidos, três candidatos caem logo na primeira linha por não terem conversor interno algum: **ATmega**, **ESP32-S3** e **RP2350**. O **MSP430FR2355** atende a quatro dos cinco critérios e seria competitivo, mas não possui controlador de DMA, o que reprova diretamente o requisito de atualização contínua e obrigaria a CPU a escrever cada amostra, introduzindo irregularidade nos instantes de envio. Restam **dsPIC33CK** e **STM32G474**, ambos aprovados nos cinco critérios. A decisão entre eles passa a ser por margem, não por eliminação: o **STM32G474** oferece sete canais de conversão contra três, seis amplificadores contra três, sete comparadores contra quatro, e 128 kB de memória contra 24 kB. Sua acomodação de 3 µs no pior caso já cumpre o requisito de 5 µs usando apenas os conversores bufferizados, e ainda reserva quatro canais rápidos de 125 ns caso a especificação seja apertada no futuro. Some-se a isso o temporizador de alta resolução de 184 ps para a onda retangular e uma referência de tensão interna, ambos ausentes ou inferiores no concorrente. O resultado prático é três componentes analógicos externos, contra oito nas opções sem periferia integrada. Uma ressalva importante: dez pontos por período é uma amostragem grosseira, e com Nyquist em 100 kHz a dente de serra ficará limitada ao quinto harmônico, com retorno visivelmente arredondado, ocupando cerca de 7% do período. Se a qualidade dessa forma de onda for relevante, vale subir para 40 ou 50 pontos por período, o que o STM32G474 comporta sem alteração de arquitetura e o dsPIC33CK não.
+Com base nos critérios estabelecidos, três candidatos caem logo na primeira linha por não terem conversor interno algum: **ATmega**, **ESP32-S3** e **RP2350**. O **MSP430FR2355** atende a quatro dos cinco critérios e seria competitivo, mas não possui controlador de DMA, o que reprova diretamente o requisito de atualização contínua e obrigaria a CPU a escrever cada amostra, introduzindo irregularidade nos instantes de envio. Restam **dsPIC33CK** e **STM32G474**, ambos aprovados nos cinco critérios. A decisão entre eles passa a ser por margem, não por eliminação: o **STM32G474** oferece sete canais de conversão contra três, seis amplificadores contra três, sete comparadores contra quatro, e 128 kB de memória contra 24 kB. Sua acomodação de 3 µs no pior caso já cumpre o requisito de 5 µs usando apenas os conversores bufferizados, e ainda reserva quatro canais rápidos de 125 ns caso a especificação seja apertada no futuro. Some-se a isso o temporizador de alta resolução de 184 ps para a onda retangular e uma referência de tensão interna, ambos ausentes ou inferiores no concorrente. O resultado prático é três componentes analógicos externos, contra oito nas opções sem periferia integrada. Uma ressalva importante: dez pontos por período é uma amostragem grosseira, e com Nyquist em 100 kHz a dente de serra ficará limitada ao quinto harmônico, com retorno visivelmente arredondado, ocupando cerca de 7% do período. Se a qualidade dessa forma de onda for relevante, vale subir para 40 ou 50 pontos por período, o que o **STM32G474** comporta sem alteração de arquitetura e o **dsPIC33CK** não.
 
 ### 3.3. Conclusão da Seleção
 O **STM32G474** foi selecionado por atender todos os requisitos apresentados.
