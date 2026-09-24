@@ -2,6 +2,8 @@
 
 Breve descrição do hardware... 
 
+- [Testes e seleção do display](./display.md)
+
 
 ## Referências (links/datasheets/livros)
 
