@@ -6,9 +6,10 @@ Foram avaliados dois shields TFT touchscreen de 2,4", com resolução de 240 × 
 
 Foram utilizadas as bibliotecas MCUFRIEND_kbv, Adafruit GFX e Adafruit TouchScreen. O exemplo gráfico validou inicialização, cores, linhas, textos, rotação e rolagem. Em seguida, o touchscreen resistivo foi calibrado e testado com botões virtuais.
 
-| Display | Controlador        | Calibração do touch                        | Resultado |
-|    1    | RM68090 (`0x6809`) | `LEFT=144`, `RT=883`, `TOP=109`, `BOT=870` | Aprovado  |
-|    2    | LGDP4532 (`0x4532`)| `LEFT=186`, `RT=889`, `TOP=186`, `BOT=876` | Aprovado  |
+| Display | Controlador | Calibração do touch | Resultado |
+|:--|:-:|:-:|:-:|
+| 1 | RM68090 (`0x6809`) | `LEFT=144`, `RT=883`, `TOP=109`, `BOT=870` | Aprovado |
+| 2 | LGDP4532 (`0x4532`) | `LEFT=186`, `RT=889`, `TOP=186`, `BOT=876` | Aprovado |
 
 O LGDP4532 exigiu a ativação manual de seu suporte na biblioteca MCUFRIEND_kbv. Após essa alteração, os testes também funcionaram normalmente.
 
