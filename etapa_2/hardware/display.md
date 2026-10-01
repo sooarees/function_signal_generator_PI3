@@ -21,6 +21,16 @@ A escolha considera principalmente a documentação mais completa e a implementa
 
 O LGDP4532 permanecerá disponível como módulo reserva.
 
+## Protótipo da interface no Arduino
+
+Para validar a subentrega da interface sem depender ainda da placa STM32, foi desenvolvido um protótipo funcional no **Arduino UNO R3** usando o display reserva **LGDP4532 (`0x4532`)**. A escolha do módulo reserva evita desgaste do display principal e permite testar livremente o layout, o touchscreen e a navegação antes da migração para o hardware final.
+
+O protótipo usa as bibliotecas **MCUFRIEND_kbv**, **Adafruit GFX** e **Adafruit TouchScreen**, em orientação paisagem (`320 × 240`). A tela inicial possui quatro botões grandes com o desenho de um período das formas de onda: senoidal, quadrada, triangular e dente de serra. Abaixo ficam os botões de parâmetros: frequência, amplitude, offset e duty cycle. Ao tocar em um parâmetro, a interface abre uma tela dedicada com o valor centralizado, uma barra de ajuste, botões de incremento e decremento, além das opções de cancelar ou salvar.
+
+Os limites adotados no protótipo seguem os requisitos definidos na etapa 1: frequência de **1 Hz a 20 kHz**, amplitude de **0 a 10 Vpp**, offset de **−5 V a +5 V** e duty cycle de **0% a 100%**. A interface não gera o sinal real neste momento; seu objetivo é validar a ergonomia, a leitura do toque, a organização das telas e o comportamento dos controles.
+
+O estilo visual atual usa fundo escuro com linhas azuis em uma proposta inspirada em interfaces do tipo **Tron**, mantendo alto contraste para facilitar a leitura no display TFT. Como o Arduino UNO possui pouca memória, o desenho é feito diretamente na tela, sem framebuffer, e as atualizações são concentradas nas regiões alteradas.
+
 ## Registros dos testes
 
 As fotos e os vídeos dos testes serão adicionados posteriormente.
