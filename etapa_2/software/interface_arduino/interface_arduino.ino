@@ -1,3 +1,10 @@
+// Interface visual de teste: seleciona ondas e ajusta parametros, sem gerar sinal.
+// Fluxo: setup() -> tela inicial -> toque -> tela de ajuste -> salvar/cancelar.
+// Os valores ficam na RAM; desligar ou reiniciar restaura os valores iniciais.
+
+// -----------------------------------------------------------------------------
+// 1. Bibliotecas, hardware e calibracao
+// -----------------------------------------------------------------------------
 #include <Adafruit_GFX.h>
 #include <MCUFRIEND_kbv.h>
 #include <TouchScreen.h>
@@ -18,15 +25,18 @@ const int TS_RT   = 889;
 const int TS_TOP  = 186;
 const int TS_BOT  = 876;
 
+// Faixa de pressao aceita para distinguir um toque de leituras sem contato.
 const int MINPRESSURE = 180;
 const int MAXPRESSURE = 1000;
 
 MCUFRIEND_kbv tft;
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
+// A rotacao 1 configura o display em paisagem.
 const int16_t SCR_W = 320;
 const int16_t SCR_H = 240;
 
+// Cores RGB565 usadas pelo tema. Os nomes sao aliases da paleta atual.
 #define BLACK   0x0000
 #define WHITE   0xFFFF
 #define GREY    0x4228
@@ -37,6 +47,10 @@ const int16_t SCR_H = 240;
 #define YELLOW  0x5FFF
 #define ORANGE  0x04FF
 
+// -----------------------------------------------------------------------------
+// 2. Tipos e declaracoes das funcoes
+// -----------------------------------------------------------------------------
+// Os enums identificam as ondas, os parametros e as duas telas disponiveis.
 enum Waveform {
   WAVE_SINE = 0,
   WAVE_SQUARE,
@@ -56,6 +70,7 @@ enum Screen {
   SCREEN_ADJUST
 };
 
+// Retangulo usado tanto para desenhar um controle quanto para detectar o toque.
 struct Button {
   int16_t x;
   int16_t y;
@@ -63,6 +78,7 @@ struct Button {
   int16_t h;
 };
 
+// Declaracoes antecipadas mantem explicitas as funcoes utilizadas pelo sketch.
 bool inside(Button b, int16_t x, int16_t y);
 bool insideTouch(Button b, int16_t x, int16_t y);
 void restoreTouchPins();
@@ -96,16 +112,23 @@ void nudgeActiveParam(int8_t direction);
 void handleHomeTouch(int16_t x, int16_t y);
 void handleAdjustTouch(int16_t x, int16_t y);
 
+// -----------------------------------------------------------------------------
+// 3. Estado da interface e disposicao dos controles
+// -----------------------------------------------------------------------------
 Waveform waveform = WAVE_SINE;
 Screen currentScreen = SCREEN_HOME;
 Param activeParam = PARAM_FREQ;
+// Copia do valor ao entrar no ajuste, utilizada para desfazer com Cancelar.
 int32_t savedAdjustValue = 0;
 
+// Unidades internas: Hz, decimos de Vpp, decimos de V e porcentagem.
+// Exemplo: amplitude 50 significa 5.0 Vpp; offset -15 significa -1.5 V.
 uint16_t freqHz = 1000;
 uint8_t ampTenthVpp = 50;
 int8_t offsetTenthV = 0;
 uint8_t dutyPct = 50;
 
+// Um quarto de senoide, na escala 0..100. Os demais quartos sao espelhados.
 const int8_t sineQuarter[33] = {
   0, 5, 10, 15, 20, 24, 29, 34, 38, 43, 47,
   51, 56, 60, 63, 67, 71, 74, 77, 80, 83,
@@ -113,6 +136,8 @@ const int8_t sineQuarter[33] = {
   100, 100
 };
 
+// Cada controle define {x, y, largura, altura}, em pixels.
+// A ordem dos arrays acompanha a ordem dos enums Waveform e Param.
 Button waveButtons[4] = {
   {8, 30, 72, 60},
   {84, 30, 72, 60},
@@ -137,19 +162,26 @@ const int16_t SLIDER_Y = 132;
 const int16_t SLIDER_W = 172;
 const int16_t SLIDER_H = 20;
 
+// Marca o ultimo toque processado para limitar a repeticao das acoes.
 unsigned long lastTouchMs = 0;
+
+// -----------------------------------------------------------------------------
+// 4. Leitura do touchscreen e deteccao dos controles
+// -----------------------------------------------------------------------------
 
 bool inside(Button b, int16_t x, int16_t y) {
   return x >= b.x && x < (b.x + b.w) && y >= b.y && y < (b.y + b.h);
 }
 
 bool insideTouch(Button b, int16_t x, int16_t y) {
+  // Amplia a area sensivel sem alterar o tamanho visual do botao.
   const int16_t margin = 6;
   return x >= (b.x - margin) && x < (b.x + b.w + margin) &&
          y >= (b.y - margin) && y < (b.y + b.h + margin);
 }
 
 void restoreTouchPins() {
+  // Touch e LCD compartilham estes pinos; getPoint() muda sua configuracao.
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
 }
@@ -170,6 +202,9 @@ bool readTouch(int16_t *x, int16_t *y) {
   return true;
 }
 
+// -----------------------------------------------------------------------------
+// 5. Fundo, textos, unidades e limites dos parametros
+// -----------------------------------------------------------------------------
 void drawTronGrid() {
   for (int16_t y = 36; y < SCR_H; y += 48) {
     tft.drawFastHLine(0, y, SCR_W, DKBLUE);
@@ -192,6 +227,7 @@ void drawHeader(const __FlashStringHelper *title) {
 }
 
 void printTenths(int16_t value) {
+  // Mostra uma casa decimal usando apenas aritmetica inteira.
   if (value < 0) {
     tft.print('-');
     value = -value;
@@ -217,6 +253,7 @@ void printFreqValue(bool compact) {
 }
 
 uint8_t valueCharCount(Param param, bool compact) {
+  // A fonte tem largura fixa; contar caracteres permite centralizar o valor.
   if (param == PARAM_FREQ) {
     if (compact && freqHz >= 1000) {
       uint8_t count = freqHz >= 10000 ? 2 : 1;
@@ -261,6 +298,7 @@ void printParamValue(Param param, bool compact) {
 }
 
 int32_t getParamValue(Param param) {
+  // Acesso comum aos valores, apesar de cada um usar um tipo inteiro diferente.
   if (param == PARAM_FREQ) return freqHz;
   if (param == PARAM_AMP) return ampTenthVpp;
   if (param == PARAM_OFFSET) return offsetTenthV;
@@ -268,6 +306,7 @@ int32_t getParamValue(Param param) {
 }
 
 void setParamValue(Param param, int32_t value) {
+  // Limites: 1..20000 Hz, 0..10 Vpp, -5..+5 V e 0..100%.
   if (param == PARAM_FREQ) {
     freqHz = constrain(value, 1, 20000);
   } else if (param == PARAM_AMP) {
@@ -293,6 +332,10 @@ const __FlashStringHelper *paramName(Param param) {
   return F("Frequencia");
 }
 
+// -----------------------------------------------------------------------------
+// 6. Desenho das ondas e da tela inicial
+// -----------------------------------------------------------------------------
+// A fase 0..255 percorre um periodo. O desenho independe dos parametros ajustados.
 int16_t sineApprox(uint8_t phase) {
   uint8_t quadrant = phase >> 6;
   uint8_t local = phase & 0x3F;
@@ -301,6 +344,7 @@ int16_t sineApprox(uint8_t phase) {
     local = 63 - local;
   }
 
+  // Interpola entre amostras vizinhas para suavizar a curva.
   uint8_t index = local >> 1;
   uint8_t frac = local & 0x01;
   int16_t a = sineQuarter[index];
@@ -344,6 +388,7 @@ void drawMiniWave(Button b, Waveform w, bool selected) {
   tft.fillRect(b.x, b.y, b.w, b.h, fill);
   tft.drawRect(b.x, b.y, b.w, b.h, border);
 
+  // Duas amostras por pixel horizontal, ligadas por segmentos de reta.
   uint8_t points = width * 2;
   int16_t lastX = left;
   int16_t lastY = mid;
@@ -362,6 +407,7 @@ void drawMiniWave(Button b, Waveform w, bool selected) {
     lastX = px;
     lastY = py;
 
+    // Fecha a dente de serra com a queda vertical ao terminar o periodo.
     if (w == WAVE_SAW && i == points - 1) {
       int16_t lowY = mid - map(previewValue(w, 0), -120, 120, -(height / 2 - 2), height / 2 - 2);
       lowY = constrain(lowY, top + 2, top + height - 3);
@@ -398,6 +444,7 @@ void drawParamButton(Param param) {
 }
 
 void drawHomeScreen() {
+  // Redesenho completo ao iniciar ou retornar da tela de ajuste.
   currentScreen = SCREEN_HOME;
   tft.fillScreen(BLACK);
   drawTronGrid();
@@ -409,9 +456,14 @@ void drawHomeScreen() {
   drawParamButton(PARAM_DUTY);
 }
 
+// -----------------------------------------------------------------------------
+// 7. Conversao entre valores e slider, e desenho da tela de ajuste
+// -----------------------------------------------------------------------------
 int16_t valueToSliderPos() {
   uint16_t half = SLIDER_W / 2;
 
+  // Frequencia: metade da barra para 1..1000 Hz, metade para 1000..20000 Hz.
+  // Essa divisao reserva mais espaco para as frequencias baixas.
   if (activeParam == PARAM_FREQ) {
     if (freqHz <= 1000) {
       return map(freqHz, 1, 1000, 0, half);
@@ -431,6 +483,8 @@ int16_t valueToSliderPos() {
 }
 
 void setValueFromSlider(int16_t touchX) {
+  // Converte a posicao tocada em valor. A resolucao depende dos pixels da barra;
+  // os botoes laterais permitem o ajuste fino que o slider nao consegue oferecer.
   int16_t pos = constrain(touchX - SLIDER_X, 0, SLIDER_W);
   uint16_t half = SLIDER_W / 2;
 
@@ -472,6 +526,7 @@ void drawAdjustButton(Button b, const __FlashStringHelper *label, uint16_t fill)
 }
 
 void drawAdjustScreen(Param param) {
+  // Guarda o valor de entrada antes de permitir alteracoes.
   activeParam = param;
   currentScreen = SCREEN_ADJUST;
   savedAdjustValue = getParamValue(param);
@@ -502,6 +557,7 @@ void drawAdjustScreen(Param param) {
 }
 
 void updateAdjustValue() {
+  // Limpa somente a regiao do valor, sem redesenhar toda a tela.
   uint8_t chars = valueCharCount(activeParam, false);
   int16_t textW = chars * 18;
   int16_t x = (SCR_W - textW) / 2;
@@ -513,7 +569,11 @@ void updateAdjustValue() {
   printParamValue(activeParam, false);
 }
 
+// -----------------------------------------------------------------------------
+// 8. Navegacao, salvar/cancelar e ajuste pelos botoes laterais
+// -----------------------------------------------------------------------------
 void openAdjust(Param param) {
+  // Duty Cycle se aplica apenas a onda quadrada neste prototipo.
   if (param == PARAM_DUTY && waveform != WAVE_SQUARE) {
     return;
   }
@@ -521,15 +581,18 @@ void openAdjust(Param param) {
 }
 
 void cancelAdjust() {
+  // Desfaz todos os ajustes feitos desde a abertura desta tela.
   setParamValue(activeParam, savedAdjustValue);
   drawHomeScreen();
 }
 
 void saveAdjust() {
+  // Os controles ja alteram as variaveis na RAM. Salvar apenas confirma e volta.
   drawHomeScreen();
 }
 
 void nudgeActiveParam(int8_t direction) {
+  // direction vale -1 ou +1. Passos: 1/100 Hz, 0.1 Vpp, 0.1 V e 3%.
   if (activeParam == PARAM_FREQ) {
     int16_t step = freqHz < 1000 ? 1 : 100;
     setParamValue(activeParam, (int32_t)freqHz + ((int32_t)direction * step));
@@ -545,10 +608,14 @@ void nudgeActiveParam(int8_t direction) {
   drawSlider();
 }
 
+// -----------------------------------------------------------------------------
+// 9. Acoes de toque em cada tela
+// -----------------------------------------------------------------------------
 void handleHomeTouch(int16_t x, int16_t y) {
   for (uint8_t i = 0; i < 4; i++) {
     if (insideTouch(waveButtons[i], x, y)) {
       waveform = (Waveform)i;
+      // Atualiza a selecao das ondas e a disponibilidade do Duty Cycle.
       drawWaveButtons();
       drawParamButton(PARAM_DUTY);
       return;
@@ -586,6 +653,7 @@ void handleAdjustTouch(int16_t x, int16_t y) {
     return;
   }
 
+  // Area sensivel maior que a barra para facilitar o arraste no touch resistivo.
   Button sliderTouch = {SLIDER_X - 10, SLIDER_Y - 24, SLIDER_W + 20, 68};
   if (inside(sliderTouch, x, y)) {
     setValueFromSlider(x);
@@ -594,6 +662,9 @@ void handleAdjustTouch(int16_t x, int16_t y) {
   }
 }
 
+// -----------------------------------------------------------------------------
+// 10. Inicializacao e ciclo principal do Arduino
+// -----------------------------------------------------------------------------
 void setup() {
   Serial.begin(9600);
 
@@ -611,6 +682,7 @@ void loop() {
 
   if (readTouch(&x, &y)) {
     unsigned long now = millis();
+    // Intervalo sem delay(): ajuste responde mais rapido e toque mantido repete.
     unsigned long delayMs = currentScreen == SCREEN_ADJUST ? 45 : 110;
 
     if (now - lastTouchMs > delayMs) {
