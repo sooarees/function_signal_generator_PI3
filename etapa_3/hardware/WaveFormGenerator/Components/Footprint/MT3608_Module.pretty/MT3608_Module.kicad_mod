@@ -122,7 +122,7 @@
 		(remove_unused_layers no)
 		(uuid "5ade455a-c602-452e-bdec-7e80e1975c6a")
 	)
-	(model "${KIPRJMOD}/Componentes/MT3608_Module.pretty/MT3608_Module.STEP"
+	(model "${KIPRJMOD}/Components/3DModel/MT3608_Module.STEP"
 		(offset
 			(xyz 0 0 2.5)
 		)
@@ -133,7 +133,7 @@
 			(xyz -90 0 0)
 		)
 	)
-	(model "${KICAD8_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x01_P2.54mm_Vertical.step"
+	(model "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x01_P2.54mm_Vertical.step"
 		(offset
 			(xyz -15.25 3.25 0)
 		)
@@ -144,7 +144,7 @@
 			(xyz 0 0 0)
 		)
 	)
-	(model "${KICAD8_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x01_P2.54mm_Vertical.step"
+	(model "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x01_P2.54mm_Vertical.step"
 		(offset
 			(xyz -15.25 -3.25 0)
 		)
@@ -155,7 +155,7 @@
 			(xyz 0 0 0)
 		)
 	)
-	(model "${KICAD8_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x01_P2.54mm_Vertical.step"
+	(model "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x01_P2.54mm_Vertical.step"
 		(offset
 			(xyz 15.25 -3.25 0)
 		)
@@ -166,7 +166,7 @@
 			(xyz 0 0 0)
 		)
 	)
-	(model "${KICAD8_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x01_P2.54mm_Vertical.step"
+	(model "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x01_P2.54mm_Vertical.step"
 		(offset
 			(xyz 15.25 3.25 0)
 		)

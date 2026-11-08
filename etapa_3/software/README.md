@@ -6,19 +6,23 @@ O display adotado é um shield TFT resistivo MCUFRIEND de 2,4 polegadas, com con
 
 ## Desenvolvimento
 
+### Projeto STM32
+
+A cópia do [projeto integrado](./function_generator_display_integration/) reúne o código-fonte atual do workspace do grupo, os arquivos do STM32CubeIDE e os presets de compilação Debug e Release. O CMSIS e o FreeRTOS acompanham o projeto. Para recompilar, importe a pasta como projeto existente no STM32CubeIDE ou use CMake, Ninja e o GCC para ARM.
+
 ### Validação inicial e organização do firmware
 
 O desenvolvimento começou com um projeto mínimo de acionamento dos LEDs da placa, usado para validar clock, GPIO, compilação, gravação e comunicação com o ST-LINK. Em seguida, o FreeRTOS foi integrado e o escalonador foi testado com a sequência visual LD1–LD2–LD3–LD2–LD1. Após essa validação, as tarefas foram separadas em arquivos próprios e os endereços de registradores inicialmente escritos de forma manual foram substituídos pelos cabeçalhos oficiais do CMSIS.
 
 A arquitetura final utiliza três tarefas:
 
-| Tarefa | Prioridade | Stack | Responsabilidade |
+| Tarefa | Prioridade | Pilha | Responsabilidade |
 |:--|:-:|:-:|:--|
 | `SignalControl` | 5 | 1536 bytes | Inicialização e controle central do sinal |
 | `SerialControl` | 4 | 1536 bytes | Comandos de diagnóstico pela USART3 |
 | `Interface` | 1 | 1536 bytes | Display, touch e navegação |
 
-O módulo `signal_control` mantém o estado oficial do gerador, valida os limites e protege as alterações concorrentes com mutex. O driver `waveform_generator` controla o canal 1 do DAC1 e o temporizador TIM6. A interrupção do TIM6 possui prioridade 4 e não chama funções do FreeRTOS; a USART3 utiliza prioridade 7. Essa organização preserva a regularidade da atualização do DAC mesmo durante a navegação na interface ou a transmissão serial.
+O módulo `signal_control` mantém o estado do gerador, valida os limites e protege as alterações concorrentes com mutex. O driver `waveform_generator` controla o canal 1 do DAC1 e o temporizador TIM6. A interrupção do TIM6 tem prioridade 4 e opera sem chamadas ao FreeRTOS. A interrupção da USART3 tem prioridade 7.
 
 ### Display, touch e interface
 
@@ -51,7 +55,7 @@ A saída digital-analógica utiliza o DAC1, canal 1, no pino PA4. A senoide é f
 | 5 kHz | 25 |
 | 20 kHz | 10 |
 
-A onda quadrada também é produzida pelo DAC1 em PA4. A interrupção do TIM6 alterna os níveis baixo e alto conforme o duty cycle. Em 0% a saída permanece no nível baixo; em 100%, no nível alto. As opções triangular e dente de serra geram uma quadrada com duty fixo de 50%, destinada aos circuitos analógicos de conversão documentados no [README de hardware](../hardware/README.md). Portanto, o firmware não sintetiza diretamente essas duas formas por tabelas de amostras.
+A onda quadrada também é produzida pelo DAC1 em PA4. A interrupção do TIM6 alterna os níveis baixo e alto conforme o ciclo de trabalho. A saída permanece em nível baixo a 0% e em nível alto a 100%. Ao selecionar triangular ou dente de serra, o firmware gera uma onda quadrada com ciclo de trabalho fixo em 50%. Os [circuitos de conversão analógica](../hardware/README.md#arquitetura-de-geração-das-formas-de-onda) são responsáveis pela formação das rampas.
 
 Os limites aceitos pelo controle são frequência de 1 Hz a 20 kHz, amplitude indicada de 0,0 a 9,8 Vpp, duty cycle de 0% a 100% e offset de −5,0 V a +5,0 V. Para a amplitude, o firmware considera um ganho externo conservador de 3,5 vezes e limita a excursão bruta em PA4 a aproximadamente 2,8 Vpp. O offset é validado e armazenado pela interface, mas ainda não possui atuação elétrica integrada na saída.
 
@@ -118,9 +122,9 @@ O firmware classificou o ensaio como aprovado.
 | Autoteste pelo ADC2 | Aprovado | 305 mVpp e aproximadamente 1 kHz |
 | Compilação final | Aprovado | `-Wall -Werror`, sem erros ou avisos |
 
-A compilação final apresentou 35.148 bytes de código, 8 bytes de dados inicializados e 18.960 bytes de dados não inicializados, totalizando 54.116 bytes. A RAM estática inclui o heap de 16 kB reservado ao FreeRTOS. A placa foi reconhecida pelo STM32CubeProgrammer, gravada e verificada com sucesso, sem alteração dos option bytes.
+A compilação registrada para a etapa apresentou 35.148 bytes na seção de código, 8 bytes de dados inicializados e 18.960 bytes de dados não inicializados. Os dados em RAM incluem a reserva de 16 kB para o heap do FreeRTOS. Durante os ensaios da etapa, o grupo reconheceu, gravou e verificou a placa com o STM32CubeProgrammer e preservou os option bytes.
 
-Os ensaios realizados não cobrem sistematicamente todas as combinações entre 1 Hz e 20 kHz, nem caracterizam distorção, ruído e jitter. Da mesma forma, o offset e os circuitos analógicos foram avaliados separadamente, não como uma cadeia completa comandada pelo firmware.
+O DAC alimentou o filtro senoidal nos [ensaios de 1 Hz a 20 kHz](../hardware/README.md#testes), e os demais blocos analógicos foram avaliados separadamente. Distorção, ruído e jitter ficaram sem caracterização.
 
 ## Referências
 
