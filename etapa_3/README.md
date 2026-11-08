@@ -202,6 +202,15 @@ O furo circular na lateral direita, mostrado na Figura 3, é destinado ao conect
 
 A separação entre a entrada de energia (lado esquerdo) e a saída de sinal (lado direito) mantém os cabos da rede elétrica afastados do caminho do sinal analógico, reduzindo o acoplamento de ruído da rede na saída do gerador.
 
+### 5.5. Protótipo impresso
+
+O gabinete foi fabricado por impressão 3D, em duas peças independentes: o corpo principal e o painel frontal, mostrados lado a lado na Figura 4. A impressão permitiu verificar as dimensões reais das peças, o encaixe do painel frontal no corpo, o alinhamento dos furos de fixação e as medidas da abertura do display antes da montagem final dos componentes.
+
+<p align="center">
+  <img src="../images/Etapa03_Gabinete_Impresso.jpeg" alt="Corpo e painel frontal do gabinete impressos em 3D" width="450">
+</p>
+<p align="center"><em>Figura 4 — Gabinete impresso em 3D: corpo principal (à esquerda) e painel frontal com a abertura do display (à direita).</em></p>
+
 ## Testes
 
 Os testes laboratoriais validaram individualmente os blocos funcionais do gerador:
