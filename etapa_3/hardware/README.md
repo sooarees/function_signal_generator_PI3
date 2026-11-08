@@ -28,26 +28,26 @@ Para validar a viabilidade física da topologia antes de calcular os valores fin
 A montagem prática executada na bancada de ensaios pode ser observada na imagem a seguir.
 
 <p align="center">
-  <img src="../../images/Etapa03_GeradorTriangDenteDeSerra_Bancada.png" alt="Montagem em bancada do gerador triangular e dente de serra" width="500">
+  <img src="../../images/Etapa03_GeradorTriangDenteDeSerra_Bancada.jpeg" alt="Montagem em bancada do gerador triangular e dente de serra" width="500">
 </p>
 <p align="center"><em>Montagem física em bancada dos circuitos de teste da onda triangular e dente de serra.</em></p>
 
 A conformação da onda triangular foi validada com sucesso na saída do primeiro estágio integrador, exibindo excelente linearidade de rampa e simetria temporal, conforme ilustrado no registro do osciloscópio abaixo.
 
 <p align="center">
-  <img src="../../images/Etapa03_OndaTriangular.png" alt="Onda triangular obtida no osciloscópio" width="500">
+  <img src="../../images/Etapa03_OndaTriangular.jpeg" alt="Onda triangular obtida no osciloscópio" width="500">
 </p>
 <p align="center"><em>Forma de onda triangular medida na saída do circuito integrador em ensaio de bancada.</em></p>
 
 Em seguida, avaliou-se a saída do multiplexador analógico comutado pela onda quadrada para validar a síntese da dente de serra. O circuito respondeu de forma estável, permitindo inclusive o controle direto da amplitude da dente de serra através do ajuste de amplitude do sinal de entrada, como demonstram as duas capturas de tela seguintes para patamares distintos de tensão.
 
 <p align="center">
-  <img src="../../images/Etapa03_OndaDenteDeSerra01.png" alt="Onda dente de serra com primeira amplitude" width="500">
+  <img src="../../images/Etapa03_OndaDenteDeSerra01.jpeg" alt="Onda dente de serra com primeira amplitude" width="500">
 </p>
 <p align="center"><em>Onda dente de serra gerada para o primeiro nível de amplitude de entrada.</em></p>
 
 <p align="center">
-  <img src="../../images/Etapa03_OndaDenteDeSerra02.png" alt="Onda dente de serra com amplitude elevada" width="500">
+  <img src="../../images/Etapa03_OndaDenteDeSerra02.jpeg" alt="Onda dente de serra com amplitude elevada" width="500">
 </p>
 <p align="center"><em>Onda dente de serra gerada para um segundo patamar de amplitude, comprovando a linearidade do estágio.</em></p>
 
