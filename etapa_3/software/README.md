@@ -1,123 +1,86 @@
-# Software do gerador de funções
+# Software da Etapa 3
 
-Esta pasta documenta o protótipo integrado desenvolvido para a placa
-NUCLEO-F439ZI, com STM32F439ZI, FreeRTOS, display resistivo MCUFRIEND e geração
-de sinais pelo DAC interno. O projeto usado no STM32CubeIDE 2.2.0 chama-se
-`function_generator_display_integration`.
+Nesta etapa, o protótipo da interface criado no Arduino foi portado para a placa NUCLEO-F439ZI e integrado à geração de sinais do STM32F439ZI [1][8]. O firmware foi desenvolvido em C no STM32CubeIDE 2.2.0, com acesso aos periféricos pelos registradores e definições do CMSIS [2]. O FreeRTOS Kernel foi utilizado para organizar o controle do sinal, a interface gráfica e o diagnóstico serial em tarefas independentes [3].
 
-## Estado da versão
+O display adotado é um shield TFT resistivo MCUFRIEND de 2,4 polegadas, com controlador RM68090 e barramento paralelo de 8 bits [4]. Como não havia um driver pronto para essa combinação de placa, shield e controlador, foi implementado um driver específico para o STM32. A sequência de inicialização, a fonte gráfica e as primitivas de desenho foram baseadas nas referências das bibliotecas MCUFRIEND_kbv e Adafruit GFX [5][6].
 
-A versão final desta etapa foi compilada com `-Wall -Werror`, sem erros ou
-avisos, gravada na placa e verificada pelo STM32CubeProgrammer. O firmware ocupa
-aproximadamente 35 kB de flash e 18,96 kB de RAM estática, valor que inclui o
-heap de 16 kB reservado ao FreeRTOS.
+## Desenvolvimento
 
-O ELF final possui SHA-256
-`916A3B217881A5C6D6AC1F57118A86F7CFBA567521DE509AA49AF838CB353AC3`.
-A gravação foi realizada na NUCLEO-F439ZI alimentada com 3,24 V, sem alteração
-dos option bytes.
+### Validação inicial e organização do firmware
 
-## Arquitetura
+O desenvolvimento começou com um projeto mínimo de acionamento dos LEDs da placa, usado para validar clock, GPIO, compilação, gravação e comunicação com o ST-LINK. Em seguida, o FreeRTOS foi integrado e o escalonador foi testado com a sequência visual LD1–LD2–LD3–LD2–LD1. Após essa validação, as tarefas foram separadas em arquivos próprios e os endereços de registradores inicialmente escritos de forma manual foram substituídos pelos cabeçalhos oficiais do CMSIS.
 
-O driver `waveform_generator` controla o DAC1 canal 1 e o TIM6. O módulo
-`signal_control` mantém o estado oficial do gerador, valida os limites e protege
-alterações concorrentes com mutex. A UI mantém somente um rascunho durante a
-edição e envia o novo valor ao controle apenas quando o usuário toca em Salvar.
-Cancelar descarta o rascunho sem alterar a saída.
+A arquitetura final utiliza três tarefas:
 
-O FreeRTOS executa três tasks:
+| Tarefa | Prioridade | Stack | Responsabilidade |
+|:--|:-:|:-:|:--|
+| `SignalControl` | 5 | 1536 bytes | Inicialização e controle central do sinal |
+| `SerialControl` | 4 | 1536 bytes | Comandos de diagnóstico pela USART3 |
+| `Interface` | 1 | 1536 bytes | Display, touch e navegação |
 
-- `SignalControl`, prioridade 5 e stack de 1536 bytes, inicializa e mantém o
-  controle central;
-- `SerialControl`, prioridade 4 e stack de 1536 bytes, atende somente aos
-  comandos de diagnóstico;
-- `Interface`, prioridade 1 e stack de 1536 bytes, controla display e touch.
+O módulo `signal_control` mantém o estado oficial do gerador, valida os limites e protege as alterações concorrentes com mutex. O driver `waveform_generator` controla o canal 1 do DAC1 e o temporizador TIM6. A interrupção do TIM6 possui prioridade 4 e não chama funções do FreeRTOS; a USART3 utiliza prioridade 7. Essa organização preserva a regularidade da atualização do DAC mesmo durante a navegação na interface ou a transmissão serial.
 
-A interrupção do TIM6 usa prioridade 4 e não chama APIs do FreeRTOS. A USART3
-usa prioridade 7. Dessa forma, a atualização do DAC tem precedência sobre a
-comunicação serial e sobre as tasks da interface.
+### Display, touch e interface
 
-## Formas de onda e limites
+O driver do display configura o barramento paralelo, inicializa o RM68090 e fornece operações para cores, linhas, retângulos, texto e orientação. O touch resistivo, cuja implementação tomou como referência a Adafruit TouchScreen [7], utiliza o ADC1 nos canais 10 e 13 e compartilha alguns pinos com o LCD. Depois de cada leitura do toque, esses pinos são restaurados para a função de saída do display. O touch é consultado aproximadamente a cada 10 ms, mas a tela é redesenhada somente quando há mudança de estado, evitando atualizações completas desnecessárias.
 
-A saída analógica bruta utiliza `PA4`, correspondente a `DAC_OUT1`, disponível
-em `D24 / CN7-17`. O GND é comum à placa e aos instrumentos externos.
+A interface permite selecionar senoide, quadrada, triangular ou dente de serra e editar frequência, amplitude, offset e duty cycle. Durante a edição, os valores permanecem em um rascunho: Salvar aplica a nova configuração e Cancelar descarta as alterações. A escolha da forma de onda é aplicada imediatamente. O duty cycle aparece apenas para a onda quadrada.
 
-Os valores aceitos pelo controle são:
+### Geração dos sinais
 
-- frequência de 1 Hz a 20 kHz;
-- amplitude de 0,0 a 9,8 Vpp, considerando o amplificador externo de 3,5 vezes;
-- duty cycle de 0% a 100% para a onda quadrada;
-- offset armazenado entre -5,0 V e +5,0 V, ainda sem atuação elétrica.
+A saída digital-analógica utiliza o DAC1, canal 1, no pino PA4. A senoide é formada a partir de uma tabela mestra com 250 amostras normalizadas. O firmware seleciona automaticamente 250, 125, 50, 25 ou 10 pontos, respeitando o teto conservador de 200 mil amostras por segundo. Esse valor foi definido para a implementação por interrupção, sem DMA, e não representa o limite físico absoluto do DAC.
 
-A configuração inicial é senoide, 1 kHz, 1,0 Vpp, offset zero e duty cycle de
-50%. A senoide utiliza uma tabela mestra de 250 pontos e seleciona
-automaticamente 250, 125, 50, 25 ou 10 pontos para manter a taxa máxima de
-atualização em 200 mil amostras por segundo.
+| Frequência configurada | Pontos utilizados |
+|:--|--:|
+| 1 Hz | 250 |
+| 1 kHz | 125 |
+| 5 kHz | 25 |
+| 20 kHz | 10 |
 
-A onda quadrada também é produzida pelo DAC. As seleções triangular e dente de
-serra são estados lógicos válidos da interface, mas nesta etapa fazem o DAC
-produzir uma quadrada com duty fixo em 50%. A conversão para triangular ou dente
-de serra será realizada posteriormente pelo circuito analógico externo.
+A onda quadrada também é produzida pelo DAC1 em PA4. A interrupção do TIM6 alterna os níveis baixo e alto conforme o duty cycle. Em 0% a saída permanece no nível baixo; em 100%, no nível alto. As opções triangular e dente de serra geram uma quadrada com duty fixo de 50%, destinada aos circuitos analógicos de conversão documentados no [README de hardware](../hardware/README.md). Portanto, o firmware não sintetiza diretamente essas duas formas por tabelas de amostras.
 
-## Display, touch e pinos
+Os limites aceitos pelo controle são frequência de 1 Hz a 20 kHz, amplitude indicada de 0,0 a 9,8 Vpp, duty cycle de 0% a 100% e offset de −5,0 V a +5,0 V. Para a amplitude, o firmware considera um ganho externo conservador de 3,5 vezes e limita a excursão bruta em PA4 a aproximadamente 2,8 Vpp. O offset é validado e armazenado pela interface, mas ainda não possui atuação elétrica integrada na saída.
 
-O display e o touch foram integrados sem ocupar PA4. O barramento paralelo do
-display utiliza GPIOA, GPIOC, GPIOD, GPIOE e GPIOF. O touch resistivo compartilha
-alguns desses sinais e usa o ADC1 nos canais 10 e 13. Após cada leitura, o
-driver restaura os pinos do barramento do display.
+### Diagnóstico e autoteste
 
-O autoteste usa o ADC2 canal 4 para medir internamente o mesmo nó analógico de
-PA4. Portanto, ele verifica a saída bruta do DAC e não a saída do amplificador
-externo de até 9,8 Vpp.
+A porta virtual do ST-LINK utiliza a USART3 em PD8 e PD9, configurada em 115200 bit/s, oito bits de dados, sem paridade, um stop bit e sem controle de fluxo. O número da porta COM depende do computador. Na versão integrada, a serial oferece apenas os comandos de diagnóstico `status` e `selftest`; ela não altera os parâmetros do gerador.
 
-## Interface e diagnóstico
+O autoteste mede internamente o mesmo nó de PA4 pelo ADC2, canal 4. O procedimento captura valores durante uma janela entre 100 e 4000 ms, determina mínimo, máximo e média, calcula a amplitude pico a pico e estima a frequência pelos cruzamentos ascendentes. A comparação utiliza tolerância de 20% do valor esperado mais 30 mV para amplitude e 5% mais 2 Hz para frequência. O resultado é informado como aprovado ou falho pela serial.
 
-O touch é a interface principal. Frequência, amplitude, offset e duty cycle são
-aplicados somente pelo botão Salvar. A escolha da forma de onda é aplicada
-imediatamente. O controle de duty fica disponível apenas quando a quadrada está
-selecionada.
+Esse teste verifica somente a saída bruta do DAC. Ele não mede o amplificador externo, a aplicação elétrica do offset, distorção harmônica, jitter, ruído ou a qualidade completa da forma de onda na saída final.
 
-A porta virtual do ST-LINK utiliza USART3 em PD8 e PD9. No computador ela foi
-identificada como COM8, configurada em 115200 bit/s, 8 bits, sem paridade, um
-stop bit e sem controle de fluxo. O número da COM pode mudar em outro
-computador.
+## Testes
 
-Na versão final, a serial não altera configurações. Estão disponíveis somente
-os comandos `status`, que mostra o estado oficial, e `selftest`, que mede PA4 e
-informa tensão mínima, máxima, média, amplitude, frequência e resultado. O
-autoteste não roda automaticamente durante o boot.
+Os testes distinguiram os protótipos intermediários da versão final integrada. Uma primeira senoide fixa de 1 kHz, com 10 pontos e faixa planejada próxima de 0,5 V a 2,5 V, foi observada no osciloscópio com aproximadamente 2,2 Vpp. Outros projetos isolados avaliaram 1 kHz com 25 e 250 pontos, 500 Hz com 250 pontos e 20 kHz com 20 pontos. Este último resultado pertence ao protótipo fixo; no firmware adaptativo final, 20 kHz utiliza 10 pontos.
 
-## Validações realizadas
+Na versão integrada, o autoteste foi executado com senoide de 1 kHz e amplitude indicada de 1,0 Vpp. Considerando o ganho externo modelado de 3,5 vezes, eram esperados aproximadamente 286 mVpp em PA4. O ADC2 registrou mínimo de 1,444 V, máximo de 1,749 V, média próxima de 1,595 V e amplitude de 305 mVpp, com frequência estimada em aproximadamente 1 kHz. O firmware classificou o ensaio como aprovado.
 
-Foram confirmados na placa:
+| Validação | Resultado | Evidência ou observação |
+|:--|:-:|:--|
+| Projeto mínimo e gravação | Aprovado | Clock, GPIO, ST-LINK e placa operacionais |
+| Escalonador do FreeRTOS | Aprovado | Sequência LD1–LD2–LD3–LD2–LD1 |
+| Display RM68090 no STM32 | Aprovado | Cores, linhas, texto e orientação |
+| Touch resistivo | Aprovado | Navegação e botões operacionais |
+| Salvar e Cancelar | Aprovado | Saída alterada somente após confirmação |
+| Senoide fixa de 1 kHz | Aprovado | Sinal observado no osciloscópio |
+| Variação da quantidade de pontos | Protótipo aprovado | Ensaios com 10, 25 e 250 pontos |
+| Controle de frequência e amplitude | Aprovado | Alteração durante a execução |
+| Integração FreeRTOS, display, touch e DAC | Aprovado | Execução simultânea sem travamento observado |
+| USART3 | Aprovado | Diagnóstico em 115200 bit/s |
+| Autoteste pelo ADC2 | Aprovado | 305 mVpp e aproximadamente 1 kHz |
+| Compilação final | Aprovado | `-Wall -Werror`, sem erros ou avisos |
 
-- inicialização simultânea de FreeRTOS, display, touch, DAC e USART3;
-- funcionamento dos botões Salvar e Cancelar;
-- atualização das configurações pelo touch;
-- leitura do estado pela serial;
-- ausência de conflito entre display, touch e PA4;
-- autoteste de uma senoide de 1 kHz e 1,0 Vpp.
+A compilação final apresentou 35.148 bytes de código, 8 bytes de dados inicializados e 18.960 bytes de dados não inicializados, totalizando 54.116 bytes. A RAM estática inclui o heap de 16 kB reservado ao FreeRTOS. A placa foi reconhecida pelo STM32CubeProgrammer, gravada e verificada com sucesso, sem alteração dos option bytes.
 
-No autoteste registrado, o ADC2 mediu 1,444 V de mínimo, 1,749 V de máximo,
-aproximadamente 1,595 V de média, 305 mVpp em PA4 e 1 kHz. O resultado foi
-classificado como válido pelo firmware.
-
-O projeto mantém hooks para falha de alocação, overflow de stack e assert. Em
-qualquer uma dessas falhas, o gerador desliga o timer e deixa o DAC no valor de
-offset antes de interromper a execução. A revisão final também conferiu heap,
-stacks, prioridades, pinos e limites.
-
-## Trabalho futuro
-
-Os testes completos entre 1 Hz e 20 kHz foram adiados. Também permanecem para
-etapas futuras a implementação elétrica do offset, os circuitos de conversão
-para triangular e dente de serra, a validação do amplificador externo, a
-migração da senoide para DMA e a medição de jitter, ruído e distorção com
-osciloscópio.
+Os ensaios realizados não cobrem sistematicamente todas as combinações entre 1 Hz e 20 kHz, nem caracterizam distorção, ruído e jitter. Da mesma forma, o offset e os circuitos analógicos foram avaliados separadamente, não como uma cadeia completa comandada pelo firmware.
 
 ## Referências
 
-- [STM32F439ZI — página oficial](https://www.st.com/en/microcontrollers-microprocessors/stm32f439zi.html)
-- [Datasheet do STM32F439ZI](https://www.st.com/resource/en/datasheet/stm32f439zi.pdf)
-- [Manual das placas Nucleo-144 UM1974](https://www.st.com/resource/en/user_manual/um1974-stm32-nucleo-144-boards-mb1137-stmicroelectronics.pdf)
-- [FreeRTOS Kernel](https://www.freertos.org/Documentation/02-Kernel/01-About-the-FreeRTOS-kernel/01-About-the-FreeRTOS-Kernel)
+1. [STMicroelectronics — STM32F439ZI](https://www.st.com/en/microcontrollers-microprocessors/stm32f439zi.html)
+2. [Arm — CMSIS](https://arm-software.github.io/CMSIS_6/latest/General/index.html)
+3. [FreeRTOS Kernel — documentação oficial](https://www.freertos.org/Documentation/02-Kernel/01-About-the-FreeRTOS-kernel/01-About-the-FreeRTOS-Kernel)
+4. [Raydium — RM68090 LCD Controller](https://www.crystalfontz.com/controllers/uploaded/Raydium_RM68090_v0.4.pdf)
+5. [MCUFRIEND_kbv](https://github.com/prenticedavid/MCUFRIEND_kbv)
+6. [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library)
+7. [Adafruit TouchScreen](https://github.com/adafruit/Adafruit_TouchScreen)
+8. [STMicroelectronics — Manual UM1974 das placas Nucleo-144](https://www.st.com/resource/en/user_manual/um1974-stm32-nucleo-144-boards-mb1137-stmicroelectronics.pdf)
