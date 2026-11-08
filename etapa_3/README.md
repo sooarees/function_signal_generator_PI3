@@ -31,6 +31,53 @@ Após a validação prática, a modelagem matemática demonstrou que, ao adotar 
 
 O esquemático integrado no KiCad foi organizado hierarquicamente em blocos funcionais (`Supply`, `MCU`, `SineFilter`, `TriangularSawtooth`, `Offset_Amplifier` e `Mux`), com documentação disponível em [hardware/README.md](./hardware/README.md). Durante a revisão técnica, identificou-se que o módulo comercial XL6019 [6] opera em topologia SEPIC de terra comum, impossibilitando a geração do barramento negativo de -12 V sem curto-circuito na alimentação. Devido a essa não conformidade e à complexidade da malha de 32 resistores, optou-se tecnicamente por adiar a confecção da placa de circuito impresso (PCB) definitiva para a Etapa 4, assegurando correções seguras de projeto.
 
+## 4. Circuito de geração da tensão de offset
+
+O circuito de offset converte duas tensões unipolares fornecidas pelos DACs do microcontrolador (0 a 3,3 V) em uma única tensão bipolar, na faixa de aproximadamente −5 V a +5 V, utilizada para deslocar o nível DC do sinal de saída do gerador.
+
+O circuito é composto por três estágios com amplificadores operacionais TL074, alimentados em ±12 V.
+
+### 4.1. Buffers de entrada (U3 e U4)
+
+Cada saída de DAC passa por um seguidor de tensão de ganho unitário. Esses estágios apresentam alta impedância de entrada e baixa impedância de saída, isolando os DACs da malha resistiva seguinte. Assim, o ganho do circuito não depende da impedância de saída dos conversores e os dois ramos do amplificador diferencial ficam equilibrados.
+
+### 4.2. Amplificador diferencial (U5)
+
+Os resistores R6 e R5 (10 kΩ) e R8 e R7 (15 kΩ) formam um subtrator com ganho diferencial definido pela razão entre eles:
+
+$$
+V_{OFFSET} = \frac{R_8}{R_6} \cdot (V_4 - V_3) = 1{,}5 \cdot (V_4 - V_3)
+$$
+
+Como cada entrada varia de 0 a 3,3 V, a diferença $V_4 - V_3$ varia de −3,3 V a +3,3 V, resultando em uma tensão de offset entre aproximadamente **−4,95 V e +4,95 V**.
+
+O uso de resistores iguais nos dois ramos ($R_6 = R_5$ e $R_8 = R_7$) garante o cancelamento da componente comum às duas entradas. O capacitor C1 (47 pF), em paralelo com R8, limita a banda do estágio e evita oscilações de alta frequência, sem afetar a resposta em corrente contínua.
+
+### 4.3. Buffer de saída (U2)
+
+Um seguidor de tensão entrega a tensão de offset ao estágio somador, garantindo baixa impedância de saída.
+
+### 4.4. Operação
+
+No firmware, adota-se um DAC para cada polaridade: para offset positivo, ajusta-se $V_4$ e mantém-se $V_3$ em 0 V; para offset negativo, o inverso.
+
+| Componente | Valor | Função |
+|---|---|---|
+| U3, U4 | TL074 (seguidor) | Buffers de entrada dos DACs |
+| R6, R5 | 10 kΩ | Resistores de entrada do subtrator |
+| R8, R7 | 15 kΩ | Resistores de realimentação e de referência (ganho 1,5) |
+| C1 | 47 pF | Limitação de banda / estabilidade |
+| U5 | TL074 | Amplificador diferencial |
+| U2 | TL074 (seguidor) | Buffer de saída |
+
+Na simulação apresentada, com $V_3 = 1{,}3\ \text{V}$ e $V_4 = 0\ \text{V}$, a saída esperada é:
+
+$$
+V_{OFFSET} = 1{,}5 \cdot (0 - 1{,}3) = -1{,}95\ \text{V}
+$$
+
+A tensão de offset é então somada ao sinal no amplificador de saída, deslocando o nível DC da forma de onda gerada conforme o valor definido pelo usuário na interface.
+
 ## Testes
 
 Os testes laboratoriais validaram individualmente os blocos funcionais do gerador:
