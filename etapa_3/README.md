@@ -165,6 +165,43 @@ $$
 
 valor cerca de 12 % abaixo do ganho teórico de 3,6. As causas prováveis são a tolerância dos resistores utilizados na montagem e a imprecisão da medida automática de pico a pico do osciloscópio, que inclui o ruído do sinal. Recomenda-se conferir os valores de R1 a R4 com multímetro e, se necessário, corrigir o ganho por calibração no firmware. Os valores de offset indicados nas legendas foram estimados a partir da posição das formas de onda em relação à referência de 0 V do canal 2.
 
+## 5. Gabinete (case) do gerador de funções
+
+O gabinete foi modelado em CAD 3D para abrigar todos os módulos do gerador: a fonte de alimentação, as placas de condicionamento analógico, o microcontrolador e a interface com o usuário. O formato é um prisma de base quadrada com arestas arredondadas, composto por um corpo principal e um painel frontal removível.
+
+### 5.1. Painel frontal
+
+O painel frontal concentra a interação com o usuário. No centro há uma abertura retangular para o display LCD touchscreen, com bordas chanfradas (em forma de moldura), como mostra a Figura 1. O chanfro amplia o ângulo de visão da tela e facilita o toque nas regiões próximas às bordas, além de dar acabamento à abertura.
+
+O painel é fixado ao corpo por seis parafusos, nos quatro cantos e no centro das laterais esquerda e direita. Essa distribuição mantém o painel bem apoiado, evita que ele se deforme com a pressão do toque na tela e permite removê-lo para acessar o interior durante a montagem e a manutenção.
+
+<p align="center">
+  <img src="../images/Etapa03_Gabinete_PainelFrontal.png" alt="Vista frontal do gabinete com a abertura do display" width="450">
+</p>
+<p align="center"><em>Figura 1 — Vista frontal do gabinete, com a abertura chanfrada do display LCD e os seis furos de fixação do painel.</em></p>
+
+### 5.2. Lateral esquerda: entrada de alimentação
+
+A abertura retangular na lateral esquerda, mostrada na Figura 2, recebe a tomada de entrada da rede elétrica (220 V), do tipo conector de painel. Os dois furos acima e abaixo da abertura são para os parafusos de fixação do conector. A entrada alimenta a fonte chaveada isolada (HLK-PM12), da qual derivam as tensões de +12 V, −12 V e +5 V do sistema.
+
+<p align="center">
+  <img src="../images/Etapa03_Gabinete_LateralEsquerda.png" alt="Vista do gabinete mostrando a lateral esquerda com a entrada de alimentação" width="350">
+</p>
+<p align="center"><em>Figura 2 — Lateral esquerda do gabinete, com a abertura para a tomada de entrada da rede elétrica (220 V) e os furos de fixação do conector.</em></p>
+
+### 5.3. Lateral direita: saída de sinal
+
+O furo circular na lateral direita, mostrado na Figura 3, é destinado ao conector coaxial (BNC) de saída, por onde o sinal gerado é entregue ao equipamento externo. O uso de conector coaxial é o padrão em instrumentação, pois permite a ligação direta a osciloscópios e outros instrumentos de bancada com cabo blindado.
+
+<p align="center">
+  <img src="../images/Etapa03_Gabinete_LateralDireita.png" alt="Vista do gabinete mostrando a lateral direita com o furo do conector BNC" width="450">
+</p>
+<p align="center"><em>Figura 3 — Vista em perspectiva do gabinete, com o furo para o conector coaxial (BNC) de saída na lateral direita.</em></p>
+
+### 5.4. Disposição geral
+
+A separação entre a entrada de energia (lado esquerdo) e a saída de sinal (lado direito) mantém os cabos da rede elétrica afastados do caminho do sinal analógico, reduzindo o acoplamento de ruído da rede na saída do gerador.
+
 ## Testes
 
 Os testes laboratoriais validaram individualmente os blocos funcionais do gerador:
