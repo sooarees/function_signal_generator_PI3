@@ -57,6 +57,7 @@ etapa_2/
   README.md
 etapa_3/
   hardware/
+    dimensionamento_integrador.md
     README.md
   software/
     README.md
@@ -1108,24 +1109,220 @@ Na parte analógica, o resultado do filtro mostrou que a simulação não foi su
 7. SEDRA, Adel S.; SMITH, Kenneth C. *Microeletrônica*. 7. ed. São Paulo: Pearson Education do Brasil, 2017.
 </file>
 
+<file path="etapa_3/hardware/dimensionamento_integrador.md">
+# Dimensionamento Matemático e Limitações do Integrador — Etapa 3
+
+Este documento apresenta a dedução analítica das limitações de largura de faixa para o circuito integrador analógico utilizado na síntese das ondas triangular e dente de serra do gerador de funções, justificando a necessidade de segmentação em múltiplos estágios resistivos.
+
+---
+
+## 1. Contextualização e Equação Base do Integrador
+
+A geração analógica da forma de onda triangular foi concebida a partir da integração temporal de uma onda quadrada periódica com ciclo de trabalho (*duty cycle*) fixo em $50\%$. Essa onda quadrada geradora é produzida pelo conversor digital-analógico (DAC) do microcontrolador com excursão de $0\text{ V}$ a $3,3\text{ V}$. 
+
+Para que a integração ocorra de forma simétrica em torno do zero virtual, aplica-se à entrada não-inversora do amplificador operacional uma tensão contínua de referência igual à metade da amplitude do sinal de entrada ($V_{\text{ref}} = 1,65\text{ V}$). Dessa forma, o sinal visto pela entrada inversora varia simetricamente entre $+1,65\text{ V}$ e $-1,65\text{ V}$.
+
+Durante meio período de integração ($t_{\text{int}} = \frac{T}{2} = \frac{1}{2f}$), a saída do integrador descreve uma rampa linear cuja excursão total pico a pico é designada por $V_o$. Definindo a taxa de variação da rampa como $\alpha$ (em $\text{V/s}$), tem-se:
+
+$$\alpha = \frac{\Delta V_o}{\Delta t} = \frac{V_o}{T / 2} = \frac{2 \cdot V_o}{T} = 2 \cdot V_o \cdot f$$
+
+Considerando que a amplitude da onda quadrada na entrada do integrador é controlada pelo DAC em uma faixa máxima de $3,3\text{ V}$, normaliza-se o parâmetro de ganho do integrador pela excursão de controle:
+
+$$\alpha = \frac{2 \cdot V_o \cdot f}{3,3}$$
+
+Onde:
+* $V_o$ é a amplitude pico a pico da onda triangular desejada na saída ($\text{V}$);
+* $f$ é a frequência fundamental do sinal ($\text{Hz}$);
+* $3,3\text{ V}$ é a tensão de fundo de escala do DAC.
+
+---
+
+## 2. Limites de Operação para um Único Conjunto RC
+
+Os requisitos gerais de projeto estabelecem:
+* Faixa total de frequências: $f_{\text{mín}} = 1\text{ Hz}$ até $f_{\text{máx}} = 20\text{ kHz}$;
+* Faixa de amplitudes de saída: $V_{o\text{ mín}} = 100\text{ mV}$ ($0,1\text{ V}$) até $V_{o\text{ máx}} = 10\text{ V}$.
+
+Na prática, a amplitude da onda quadrada fornecida pelo DAC não pode assumir valores arbitrariamente pequenos devido à resolução efetiva e ao piso de ruído do conversor. Adotando $10\text{ mV}$ como o menor degrau de amplitude confiável na entrada e $1,5\text{ V}$ como a excursão máxima útil em torno da referência de $1,65\text{ V}$ (garantindo margem linear sem ceifamento), define-se a razão dinâmica máxima de controle de amplitude por software ($\alpha_{\text{máx}} / \alpha_{\text{mín}}$) para uma dada malha como:
+
+$$\frac{\alpha_{\text{máx}}}{\alpha_{\text{mín}}} = \frac{1,5\text{ V}}{10\text{ mV}} = 150$$
+
+Para um único conjunto de componentes passivos $R$ e $C$, a taxa de integração mínima e máxima requeridas nos extremos de amplitude e frequência são dadas por:
+
+$$\alpha_{\text{mín}} = \frac{2 \cdot V_{o\text{ mín}} \cdot f_{\text{mín}}}{3,3}$$
+
+$$\alpha_{\text{máx}} = \frac{2 \cdot V_{o\text{ máx}} \cdot f_{\text{máx}}}{3,3}$$
+
+Dividindo a expressão de $\alpha_{\text{máx}}$ por $\alpha_{\text{mín}}$ para uma mesma configuração física de circuito:
+
+$$\frac{\alpha_{\text{máx}}}{\alpha_{\text{mín}}} = \frac{V_{o\text{ máx}} \cdot f_{\text{máx}}}{V_{o\text{ mín}} \cdot f_{\text{mín}}}$$
+
+Isolando a razão entre as frequências operacionais máxima e mínima permitidas:
+
+$$\frac{f_{\text{máx}}}{f_{\text{mín}}} = \frac{V_{o\text{ mín}}}{V_{o\text{ máx}}} \cdot \frac{\alpha_{\text{máx}}}{\alpha_{\text{mín}}}$$
+
+Substituindo os valores nominais de projeto ($V_{o\text{ mín}} = 0,1\text{ V}$, $V_{o\text{ máx}} = 10\text{ V}$ e razão dinâmica máxima igual a $150$):
+
+$$\frac{f_{\text{máx}}}{f_{\text{mín}}} = \frac{0,1}{10} \cdot 150 = 0,01 \cdot 150 = 1,5$$
+
+$$\implies f_{\text{máx}} = 1,5 \cdot f_{\text{mín}}$$
+
+Esse resultado revela uma restrição crítica: **um único circuito integrador RC fixo só consegue cobrir uma faixa de frequências onde o limite superior é apenas $1,5$ vez o limite inferior ($f$ a $1,5f$)**, caso se deseje manter a capacidade total de ajuste de amplitude de $100\text{ mV}$ a $10\text{ V}$.
+
+### Exemplo Numérico para a Primeira Faixa ($1\text{ Hz}$ a $1,5\text{ Hz}$)
+
+Adotando $f_{\text{mín}} = 1\text{ Hz}$, a frequência máxima alcançável sem troca de componentes é $f_{\text{máx}} = 1,5\text{ Hz}$:
+
+$$\alpha_{\text{mín}} = \frac{2 \cdot 0,1 \cdot 1}{3,3} = \frac{0,2}{3,3} \approx 60,6\text{ mV/s} \quad (61\text{ m})$$
+
+$$\alpha_{\text{máx}} = \frac{2 \cdot 10 \cdot 1,5}{3,3} = \frac{30}{3,3} \approx 9,09\text{ V/s}$$
+
+---
+
+## 3. Cálculo do Número de Malhas RC Necessárias (1 Hz a 20 kHz)
+
+Como cada estágio RC cobre um fator multiplicativo de apenas $1,5\times$ em frequência, cobrir todo o espectro de $1\text{ Hz}$ até $20.000\text{ Hz}$ exige o escalonamento em uma progressão geométrica telescópica de $n$ subfaixas adjacentes:
+
+$$20.000 = (1,5^1 - 1,5^0) + (1,5^2 - 1,5^1) + (1,5^3 - 1,5^2) + \dots + (1,5^n - 1,5^{n-1})$$
+
+A simplificação da série telescópica resulta em:
+
+$$20.000 = 1,5^n - 1,5^0$$
+
+$$1,5^n = 20.000 - 1 = 19.999$$
+
+Aplicando logaritmo em ambos os lados:
+
+$$n = \log_{1,5}(19.999) = \frac{\ln(19.999)}{\ln(1,5)} \approx \frac{9,903437}{0,405465} \approx 24,42\text{ circuitos RC}$$
+
+Portanto, seriam necessárias teoricamente pelo menos **25 combinações RC discretas** para cobrir continuamente de $1\text{ Hz}$ a $20\text{ kHz}$ atendendo simultaneamente a todas as especificações de amplitude e tensão de entrada.
+
+---
+
+## 4. Adaptação no Esquemático para 32 Canais
+
+Para viabilizar a seleção dessas malhas com componentes comerciais, optou-se pela utilização de multiplexadores analógicos de 8 canais `CD4051B`. Quatro circuitos integrados em paralelo fornecem $4 \times 8 = 32$ canais de seleção resistiva:
+
+$$x^{32} = 19.999 \implies x = \sqrt[32]{19.999} \approx 1,36$$
+
+Com 32 resistores selecionáveis divididos entre dois integradores (um com capacitor de maior capacitância para baixas frequências e outro de menor capacitância para altas frequências), cada subfaixa opera com uma razão de passo de $1,36\times$, garantindo sobreposição segura entre as faixas adjacentes ao longo de todo o espectro.
+
+---
+
+## Referências
+
+1. SEDRA, Adel S.; SMITH, Kenneth C. *Microeletrônica*. 7. ed. São Paulo: Pearson Education do Brasil, 2017.
+2. [Texas Instruments — CD4051B CMOS Single 8-Channel Analog Multiplexer/Demultiplexer Datasheet](https://www.ti.com/lit/ds/symlink/cd4051b.pdf)
+3. [Texas Instruments — TL084 JFET-Input Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/tl084.pdf)
+</file>
+
 <file path="etapa_3/hardware/README.md">
 # Hardware da Etapa 3
 
-Nesta etapa, o foco do desenvolvimento de hardware concentrou-se na implementação, montagem e testes práticos do circuito de filtro ativo de reconstrução, bem como nos circuitos dedicados à geração das formas de onda triangular e quadrada. 
+Este documento apresenta o desenvolvimento, os testes laboratoriais e a modelagem do estágio analógico de conformação de sinais da Etapa 3 do Gerador de Função Microcontrolado. O foco principal concentrou-se na via analógica dedicada à síntese das formas de onda triangular e dente de serra, bem como no esquemático integrado no KiCad.
 
-## Desenvolvimento
+---
 
-O circuito foi montado para validar a atenuação de harmônicas indesejadas geradas pelo processo de conversão digital-analógica (DAC) e a conformação correta dos sinais. Utilizou-se amplificadores operacionais e redes RC/ativas para estruturar o filtro passa-baixas, garantindo a integridade do sinal senoidal e triangular. Para a onda quadrada, foram implementados circuitos de disparo e condicionamento de bordas para obter tempos de subida e descida adequados.
+## 1. Concepção da Arquitetura e Separação de Vias
 
-## Testes e Validação
+Na Etapa 2, constatou-se que o filtro de reconstrução ativo passa-baixas de Bessel provocava atenuações assimétricas e distorções severas de transição em sinais não senoidais. Em decorrência desse resultado experimental, adotou-se a separação do condicionamento em vias independentes de hardware:
+* **Via Senoidal:** Canal dedicado composto pelo filtro de reconstrução Sallen-Key de Bessel, dimensionado para suavizar os degraus do conversor digital-analógico (DAC);
+* **Via Quadrada, Triangular e Dente de Serra:** Canal analógico independente, livre da filtragem passa-baixa, preservando tempos de subida e descida reduzidos.
 
-Foram realizados testes utilizando osciloscópio para monitorar a resposta em frequência do filtro, a linearidade da rampa na onda triangular e o *overshoot* / tempo de subida da onda quadrada. Os resultados permitiram ajustar os componentes passivos para otimizar o desempenho do gerador de funções.
+### 1.1. Onda Quadrada
+A forma de onda quadrada não necessita de processamento por integrador. Ela é gerada pelo DAC do microcontrolador (ou via chaveamento de pino digital com temporizador), permitindo seleção flexível de frequência, amplitude e ciclo de trabalho.
+
+### 1.2. Onda Triangular
+A onda triangular é gerada a partir da integração temporal de uma onda quadrada com *duty cycle* rigorosamente fixado em $50\%$. O sinal é aplicado à entrada inversora de um circuito integrador ativo baseado no amplificador operacional `TL084` [1]. Para garantir que a saída integre de forma simétrica em torno do zero de referência, aplica-se à entrada não-inversora do amplificador um nível DC de $1,65\text{ V}$ (metade da excursão máxima de $3,3\text{ V}$ do DAC). Como o tempo em nível alto é idêntico ao tempo em nível baixo, a rampa resultante oscila com inclinações positiva e negativa de módulos rigorosamente iguais.
+
+### 1.3. Onda Dente de Serra
+A síntese da onda dente de serra foi concebida a partir de duas ondas triangulares em oposição de fase. A primeira triangular é proveniente da saída do integrador; a segunda é gerada aplicando-se essa mesma rampa à entrada de um amplificador inversor com ganho unitário configurado no `TL084` [1]. Ambos os sinais passam por pequenos capacitores de acoplamento para eliminação de níveis contínuos e são conectados aos canais de entrada de um multiplexador analógico bidirecional `CD4051B` [2]. O pino de seleção de canal do multiplexador é acionado em sincronia direta pela própria onda quadrada geradora do circuito: quando a quadrada está em nível alto, o multiplexador comuta para a rampa ascendente da primeira onda; quando a quadrada transita para nível baixo, o multiplexador conecta a rampa ascendente correspondente da onda invertida, formando uma onda dente de serra contínua.
+
+---
+
+## 2. Validação Experimental em Bancada
+
+Para validar a viabilidade física da topologia antes de calcular os valores finais de componentes para toda a faixa de operação, realizou-se a montagem do protótipo em bancada. Injetou-se uma onda quadrada de $50\%$ de ciclo de trabalho a partir de um gerador de funções de laboratório para alimentar o circuito composto por AmpOps `TL084` e a chave analógica `CD4051B`.
+
+A montagem prática executada na bancada de ensaios pode ser observada na imagem a seguir.
+
+<p align="center">
+  <img src="../../images/Etapa03_GeradorTriangDenteDeSerra_Bancada.png" alt="Montagem em bancada do gerador triangular e dente de serra" width="500">
+</p>
+<p align="center"><em>Montagem física em bancada dos circuitos de teste da onda triangular e dente de serra.</em></p>
+
+A conformação da onda triangular foi validada com sucesso na saída do primeiro estágio integrador, exibindo excelente linearidade de rampa e simetria temporal, conforme ilustrado no registro do osciloscópio abaixo.
+
+<p align="center">
+  <img src="../../images/Etapa03_OndaTriangular.png" alt="Onda triangular obtida no osciloscópio" width="500">
+</p>
+<p align="center"><em>Forma de onda triangular medida na saída do circuito integrador em ensaio de bancada.</em></p>
+
+Em seguida, avaliou-se a saída do multiplexador analógico comutado pela onda quadrada para validar a síntese da dente de serra. O circuito respondeu de forma estável, permitindo inclusive o controle direto da amplitude da dente de serra através do ajuste de amplitude do sinal de entrada, como demonstram as duas capturas de tela seguintes para patamares distintos de tensão.
+
+<p align="center">
+  <img src="../../images/Etapa03_OndaDenteDeSerra01.png" alt="Onda dente de serra com primeira amplitude" width="500">
+</p>
+<p align="center"><em>Onda dente de serra gerada para o primeiro nível de amplitude de entrada.</em></p>
+
+<p align="center">
+  <img src="../../images/Etapa03_OndaDenteDeSerra02.png" alt="Onda dente de serra com amplitude elevada" width="500">
+</p>
+<p align="center"><em>Onda dente de serra gerada para um segundo patamar de amplitude, comprovando a linearidade do estágio.</em></p>
+
+---
+
+## 3. Dimensionamento Teórico e Limitações Metrológicas
+
+Com a prova de conceito comprovada em bancada, realizou-se a modelagem matemática para dimensionar os componentes passivos frente às especificações nominais do projeto ($1\text{ Hz}$ a $20\text{ kHz}$ e $100\text{ mV}$ a $10\text{ V}$).
+
+A dedução matemática demonstrou que, ao se fixar a resolução prática do DAC em $10\text{ mV}$ e admitir uma excursão útil de entrada de $1,5\text{ V}$, a razão dinâmica $\alpha_{\text{máx}} / \alpha_{\text{mín}}$ para um par $RC$ fixo fica limitada em $150$. Substituindo a excursão de amplitude demandada na saída, conclui-se que **um único conjunto RC cobre apenas uma janela de frequência proporcional a $1,5\times$ ($f_{\text{máx}} = 1,5 \cdot f_{\text{mín}}$)**.
+
+Para varrer continuamente todo o intervalo de $1\text{ Hz}$ a $20\text{ kHz}$, o cálculo resultou na necessidade estrita de $24,42$ combinações resistivas. No esquemático, essa demanda foi solucionada com 4 multiplexadores `CD4051B` [2], totalizando 32 canais de seleção com razão de passo de $1,36\times$. 
+
+A dedução algébrica detalhada e o memorial de cálculo encontram-se disponíveis em:
+* [Memorial de Dimensionamento e Limitações do Integrador](./dimensionamento_integrador.md)
+
+---
+
+## 4. Projeto no KiCad e Esquemático Integrado
+
+O esquemático completo foi projetado no software KiCad (v10) e estruturado em folhas hierárquicas, disponível no arquivo de documentação [Sch/GeradorDeOnda.pdf](../../Sch/GeradorDeOnda.pdf). A organização dos arquivos no repositório compreende:
+* `GeradorDeOnda.kicad_sch`: Folha principal de interconexão entre os subsistemas;
+* `Supply.kicad_sch`: Estágio de entrada com módulo AC-DC isolado `HLK-PM05` ($5\text{ V}$) [4], conversor boost `MT3608` ($+12\text{ V}$) [5] e conversor `XL6019` [6];
+* `MCU.kicad_sch`: Pinagem de E/S e canais analógicos da placa `NUCLEO-F439ZI` (`STM32F439ZI`) [7];
+* `SineFilter.kicad_sch`: Filtro de reconstrução ativo passa-baixas Sallen-Key de 4ª ordem baseado em `TL084` [1];
+* `TriangularSawtooth.kicad_sch`: Malha de seleção de 32 resistores por chaves `CD4051B` [2], integradores para faixas de baixa e alta frequência e amplificadores inversores com `TL084` [1];
+* `Offset_Amplifier.kicad_sch`: Circuito somador/subtrator de offset com `TL084` [1] e amplificador de potência de saída com `TL081` [3];
+* `Mux.kicad_sch`: Multiplexador analógico de seleção final da forma de onda entregue aos bornes de saída;
+* `Components/`: Modelos 3D (`MT3608_Module.STEP`), bibliotecas de símbolos e footprints dedicados para os módulos e conectores da placa.
+
+### 4.1. Análise Crítica e Decisões de Manufatura
+Durante a revisão criteriosa do esquemático na Etapa 3, identificou-se uma incompatibilidade crítica no módulo comercial de alimentação `U3` (`XL6019`). Os módulos de 4 pinos comercializados como buck-boost utilizam a topologia SEPIC não isolada, possuindo o plano de terra da entrada (`IN-`) em curto-circuito físico direto com o terra de saída (`OUT-`). A tentativa de gerar $-12\text{ V}$ invertendo a polaridade dos bornes provoca curto-circuito direto entre o barramento negativo e o terra geral ($0\text{V}$) da fonte e do computador conectado via USB.
+
+Somada à expressiva complexidade de roteamento imposta pelos 32 resistores de comutação dos integradores, essa restrição de alimentação levou à decisão técnica de **não manufaturar a placa de circuito impresso (PCB) definitiva nesta etapa**. Priorizou-se a validação funcional individual de todos os blocos em bancada, postergando a confecção da PCB para a Etapa 4 após a incorporação de uma fonte simétrica com isolação galvânica adequada.
+
+---
+
+## 5. Blocos Complementares do Sistema
+
+Os demais subsistemas analógicos desenvolvidos pela equipe completam a cadeia de sinal do equipamento:
+* **Filtro Senoidal:** Estruturado a partir de células Sallen-Key ativas com amplificadores operacionais `TL084`, projetado para atenuar harmônicas superiores e reconstruir com suavidade a senoide gerada pelo DAC;
+* **Estágio de Offset e Amplificação:** Composto por um estágio subtrator diferencial para aplicação de tensão contínua ajustável ($-5\text{ V}$ a $+5\text{ V}$) e um estágio de saída com ganho de $3,5\times$ baseado em `TL081` [3], permitindo excursão de sinal até aproximadamente $10\text{ V}_{\text{pp}}$;
+* **Fonte de Alimentação Primária:** Alimentada pela rede de $220\text{ V}_{\text{AC}}$, baseada no módulo conversor isolado `HLK-PM05` [4] para distribuição dos $5\text{ V}$ da lógica e conversores chaveados para os trilhos dos amplificadores.
+
+---
 
 ## Referências (links/datasheets/livros)
 
-1. SEDRA, Adel S.; SMITH, Kenneth C. *Microeletrônica*. 7. ed. São Paulo: Pearson Education do Brasil, 2017.
-2. Analog Devices — Fundamentos de DDS e filtros de reconstrução.
-3. Datasheets dos Amplificadores Operacionais utilizados no projeto.
+1. [Texas Instruments — TL084 JFET-Input Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/tl084.pdf)
+2. [Texas Instruments — CD4051B CMOS Single 8-Channel Analog Multiplexer/Demultiplexer Datasheet](https://www.ti.com/lit/ds/symlink/cd4051b.pdf)
+3. [Texas Instruments — TL081 JFET-Input Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/tl081.pdf)
+4. [Hi-Link — HLK-PM05 AC-DC 5V 3W Power Supply Module](https://hlktech.net/index.php?id=109)
+5. [Aerosemi — MT3608 2A Step Up Converter Datasheet](https://www.olimex.com/Products/Breadboarding/BB-PWR-3608/resources/MT3608.pdf)
+6. [XLSEMI — XL6019 5A 180KHz 40V Buck-Boost DC-DC Converter Datasheet](https://www.xlsemi.com/datasheet/XL6019-CN.pdf)
+7. [STMicroelectronics — STM32F439ZI Datasheet DS9484](https://www.st.com/resource/en/datasheet/stm32f439zi.pdf)
+8. SEDRA, Adel S.; SMITH, Kenneth C. *Microeletrônica*. 7. ed. São Paulo: Pearson Education do Brasil, 2017.
 </file>
 
 <file path="etapa_3/software/README.md">
@@ -1255,28 +1452,64 @@ osciloscópio.
 </file>
 
 <file path="etapa_3/README.md">
-# Etapa 1
+# Etapa 3
 
-**(MÍNIMO DE 600 E MÁXIMO DE 1000 PALAVRAS no total do arquivo md.)**
-
-A etapa 1 ...
-
-**(Adicionar aqui UM parágrafo com visão geral da etapa. Resumo dos itens da planilha.)**
-
-**(Não adicione código em nenhum arquivo md. )**
+Nesta etapa avançamos na implementação física e na consolidação da arquitetura do gerador de funções microcontrolado, integrando o firmware multitarefa na placa de desenvolvimento e desenvolvendo os circuitos analógicos de conformação de sinal. O trabalho compreendeu a integração do sistema operacional de tempo real com os periféricos de conversão, a validação experimental dos circuitos geradores de onda quadrada, triangular e dente de serra em bancada, a revisão do esquemático completo no KiCad e a análise metrológica dos limites operacionais do sistema.
 
 ## Desenvolvimento
 
-Apresentar o desenvolvimento da etapa contendo detalhes de implementação (se houver) de hardware e software. Use fotos, diagramas, tabelas etc. Adicionar pesqusisas realizadas. Relacionar as fotos, diagramas, etc no texto. Todas as referências devem citadas no texto. 
+### 1. Firmware e Integração no Microcontrolador
+
+A arquitetura de software foi consolidada na placa NUCLEO-F439ZI com o microcontrolador STM32F439ZI [7] utilizando o sistema operacional FreeRTOS. A estrutura foi dividida em tarefas concorrentes com prioridades estritas: controle do sinal e sincronização (`SignalControl`), recepção de comandos seriais e telemetria (`SerialControl`), e atualização da interface gráfica com leitura do touchscreen (`Interface`). 
+
+A geração do sinal de onda senoidal e da onda quadrada base utiliza o conversor digital-analógico interno DAC1 (canal 1 no pino PA4) sincronizado pelo temporizador TIM6 em interrupção periódica. A interface gráfica opera em orientação paisagem com o controlador de display, permitindo alterar parâmetros como frequência (1 Hz a 20 kHz), amplitude (até 9,8 Vpp) e ciclo de trabalho. Um canal de conversão analógico-digital (ADC2 no canal 4) foi configurado para executar autotestes internos no nó de saída do DAC. A documentação completa da arquitetura do firmware e das tarefas está disponível em [software/README.md](./software/README.md).
+
+### 2. Geração e Condicionamento Analógico das Formas de Onda
+
+Diante das distorções de atenuação e fase observadas na Etapa 2 ao filtrar ondas com bordas rápidas em filtros de reconstrução, a arquitetura analógica foi dividida em duas vias funcionais: uma malha com filtro passa-baixas Sallen-Key de Bessel para a senoide e uma via analógica dedicada para as formas de onda não senoidais.
+
+A onda quadrada é fornecida pelo DAC, permitindo amplo controle de amplitude e ciclo de trabalho. Para a síntese da onda triangular, empregou-se um circuito integrador ativo baseado no amplificador operacional TL084 [1], que recebe a onda quadrada com ciclo de trabalho fixado em 50% e um nível contínuo de referência de 1,65 V na entrada não-inversora, proporcionando integração simétrica com inclinações idênticas.
+
+A onda dente de serra é produzida a partir de duas ondas triangulares defasadas em 180 graus: a triangular original do integrador e uma versão defasada obtida por um estágio inversor de ganho unitário com TL084 [1]. Ambas são conectadas a um multiplexador analógico CD4051B [2] acoplado em corrente alternada. A própria onda quadrada geradora comuta o canal do multiplexador em sincronia com o sinal, selecionando alternadamente os trechos ascendentes das rampas para compor a dente de serra. 
+
+O protótipo de bancada comprovou a viabilidade prática da topologia, como ilustrado na imagem a seguir:
+
+<p align="center">
+  <img src="../images/Etapa03_GeradorTriangDenteDeSerra_Bancada.png" alt="Protótipo do gerador em bancada" width="500">
+</p>
+<p align="center"><em>Montagem experimental do estágio analógico gerador de sinais não senoidais.</em></p>
+
+### 3. Modelagem Matemática e Esquemático no KiCad
+
+Após a validação prática, a modelagem matemática demonstrou que, ao adotar 10 mV como resolução mínima do DAC e exigir excursão de 100 mV a 10 V na saída, um único circuito RC cobre uma janela de frequências restrita a uma razão de 1,5 vezes ($f$ a $1,5f$). Para contemplar de 1 Hz a 20 kHz, seriam necessárias 24,42 malhas discretas. O esquemático integrou essa demanda através de 4 multiplexadores CD4051B [2], permitindo selecionar 32 combinações resistivas com fator de passo de 1,36 vezes. Os cálculos estão detalhados em [hardware/dimensionamento_integrador.md](./hardware/dimensionamento_integrador.md).
+
+O esquemático integrado no KiCad foi organizado hierarquicamente em blocos funcionais (`Supply`, `MCU`, `SineFilter`, `TriangularSawtooth`, `Offset_Amplifier` e `Mux`), com documentação disponível em [hardware/README.md](./hardware/README.md). Durante a revisão técnica, identificou-se que o módulo comercial XL6019 [6] opera em topologia SEPIC de terra comum, impossibilitando a geração do barramento negativo de -12 V sem curto-circuito na alimentação. Devido a essa não conformidade e à complexidade da malha de 32 resistores, optou-se tecnicamente por adiar a confecção da placa de circuito impresso (PCB) definitiva para a Etapa 4, assegurando correções seguras de projeto.
 
 ## Testes
 
-Descrição dos testes/validações realizadas. Use fotos, diagramas, tabelas, etc.
+Os testes laboratoriais validaram individualmente os blocos funcionais do gerador:
+
+| Subsistema avaliado | Resultado | Observações metrológicas |
+|:--|:-:|:--|
+| Firmware FreeRTOS e DAC | Aprovado | Execução estável das tasks, autoteste via ADC2 com 305 mVpp a 1 kHz |
+| Touchscreen e display | Aprovado | Navegação, ajuste de parâmetros e botões operando sem travamento |
+| Circuito integrador triangular | Aprovado | Rampas simétricas e lineares comprovadas em osciloscópio |
+| Gerador de onda dente de serra | Aprovado | Comutação síncrona por CD4051B validada em duas amplitudes |
+| Filtro de reconstrução senoidal | Aprovado | Atenuação adequada de harmônicas discretas do DAC em bancada |
+| Fonte chaveada SEPIC (XL6019) | Reprovado | Terra comum inviabiliza -12 V; requer fonte com isolação galvânica |
+
+Os testes confirmaram a solidez do firmware e a conformação de todas as formas de onda analógicas. A reprogramação da malha resistiva e a readequação da fonte simétrica constituem as diretrizes prioritárias para a entrega da PCB na Etapa 4.
 
 ## Referências (links/datasheets/livros)
 
-
-- [nRF Connect SDK](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.4.2/nrf/getting_started/modifying.html#configure-application>)
+1. [Texas Instruments — TL084 JFET-Input Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/tl084.pdf)
+2. [Texas Instruments — CD4051B CMOS Analog Multiplexer/Demultiplexer Datasheet](https://www.ti.com/lit/ds/symlink/cd4051b.pdf)
+3. [Texas Instruments — TL081 JFET-Input Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/tl081.pdf)
+4. [Hi-Link — HLK-PM05 AC-DC 5V 3W Power Supply Module](https://hlktech.net/index.php?id=109)
+5. [Aerosemi — MT3608 2A Step Up Converter Datasheet](https://www.olimex.com/Products/Breadboarding/BB-PWR-3608/resources/MT3608.pdf)
+6. [XLSEMI — XL6019 5A Buck-Boost DC-DC Converter Datasheet](https://www.xlsemi.com/datasheet/XL6019-CN.pdf)
+7. [STMicroelectronics — STM32F439ZI Datasheet DS9484](https://www.st.com/resource/en/datasheet/stm32f439zi.pdf)
+8. SEDRA, Adel S.; SMITH, Kenneth C. *Microeletrônica*. 7. ed. São Paulo: Pearson Education do Brasil, 2017.
 </file>
 
 <file path="etapa_4/hardware/README.md">

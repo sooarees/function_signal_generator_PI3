@@ -1,0 +1,727 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "7a876181-a992-4245-9ac5-0174897dceb8")
+	(paper "A4")
+	(title_block
+		(title "Wave Form Generator")
+		(date "2026-11-04")
+		(rev "V1A")
+		(company "IFSC")
+	)
+	(lib_symbols
+		(symbol "Mechanical:MountingHole"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom no)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "H"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "MountingHole"
+				(at 0 3.175 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Mounting Hole without connection"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "mounting hole"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "MountingHole*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "MountingHole_0_1"
+				(circle
+					(center 0 0)
+					(radius 1.27)
+					(stroke
+						(width 1.27)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 58.42 176.53 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1a34c490-88c3-4304-ad28-7afaf93260c7")
+		(property "Reference" "H3"
+			(at 60.96 175.2599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 60.96 177.7999 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
+			(at 58.42 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 58.42 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 58.42 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(reference "H3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 20.32 176.53 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7083a46c-9405-47f3-8af7-43ec106f4aec")
+		(property "Reference" "H1"
+			(at 22.86 175.2599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 22.86 177.7999 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
+			(at 20.32 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 20.32 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 20.32 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(reference "H1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 77.47 176.53 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d51272dd-3cf8-40a4-b59b-51314c100b0c")
+		(property "Reference" "H4"
+			(at 80.01 175.2599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 80.01 177.7999 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
+			(at 77.47 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 77.47 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 77.47 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(reference "H4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 39.37 176.53 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e737d736-23ee-46eb-8a99-924307854813")
+		(property "Reference" "H2"
+			(at 41.91 175.2599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 41.91 177.7999 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
+			(at 39.37 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 39.37 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 39.37 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(reference "H2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(sheet
+		(at 15.24 68.58)
+		(size 25.4 17.78)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.254)
+			(type solid)
+			(color 0 0 0 1)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "7c50e520-103a-4a33-a631-baf661b59ffb")
+		(property "Sheetname" "SineFilter"
+			(at 15.24 67.8684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "SineFilter.kicad_sch"
+			(at 15.24 86.9446 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 15.24 119.38)
+		(size 25.4 17.78)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.254)
+			(type solid)
+			(color 0 0 0 1)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "8cbe44ee-934a-48f8-80c1-8bff54b4d90a")
+		(property "Sheetname" "Offset_Amplifier"
+			(at 15.24 118.6684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Offset_Amplifier.kicad_sch"
+			(at 15.24 137.7446 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 15.24 43.18)
+		(size 25.4 17.78)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.254)
+			(type solid)
+			(color 0 0 0 1)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "92f1f0d6-d91c-42a6-bf00-27e5e1bf8aef")
+		(property "Sheetname" "MCU"
+			(at 15.24 42.4684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "MCU.kicad_sch"
+			(at 15.24 61.5446 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 15.24 17.78)
+		(size 25.4 17.78)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.254)
+			(type solid)
+			(color 0 0 0 1)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "b622610b-c78a-4d93-85bf-f9338da477b6")
+		(property "Sheetname" "Supply"
+			(at 15.24 17.0684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Supply.kicad_sch"
+			(at 15.24 36.1446 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 15.24 144.78)
+		(size 25.4 17.78)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.254)
+			(type solid)
+			(color 0 0 0 1)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "b8d7f37a-7fb6-4534-9ff0-b800100f62b1")
+		(property "Sheetname" "Mux"
+			(at 15.24 144.0684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Mux.kicad_sch"
+			(at 15.24 163.1446 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(page "7")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 15.24 93.98)
+		(size 25.4 17.78)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.254)
+			(type solid)
+			(color 0 0 0 1)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "e2bdefbe-ca0c-422e-b65c-8017123d4d4f")
+		(property "Sheetname" "TriangularSawtooth"
+			(at 15.24 93.2684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "TriangularSawtooth.kicad_sch"
+			(at 15.24 112.3446 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "GeradorDeOnda"
+				(path "/7a876181-a992-4245-9ac5-0174897dceb8"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+	(embedded_files
+		(file
+			(name "Template_PCI.kicad_wks")
+			(type worksheet)
+			(data |KLUv/WBDC5UWAFagZSEA1TZqRddU+OwqQ7NzRx0BQ+AI1OD6mIpDI9ss/XcDBRNdAFYAXwCU4/CK
+				28M6HPceO3LcHU7WtLqYOfqGmr3B1WDZn9Q7+8siLGbQYGd1XMrlHuFdAAACAhK0cUknRmmo/GEN
+				SFKux301FjHHgNVaq6fv4phLjUMFQEBQfkSa73r5UwiekzZ5lyCPfa8a6a3Truto/cCxc0NloG7W
+				XXgVlGPvbnHcVLfv5UhSlfI9wrvbllb2nVrSSHtift8Xk9ipxqIevQ06dfr+/on4LWz+e4b4SWv1
+				re8uqXrcuMbknVC2iTYp5Yplf1rPYTZKCFOwipgY5d/1soPyLeIwrNT1CI4ewsJm5RmtEQlXoWwY
+				zUJTcA4TwSLopJed1rJ1Xo5ROy/stFm0hWa7VCqcieAJvO9Ca03SeIs4AYHhaYZls1azer+u6+3E
+				HPE1s6xsZhhJvGQ4Kr6qiEpn/UxEm0Akiqth0SaWbWtUvqIzq6YF0SLbg2NkhpfBu7O//7U9LJwF
+				3Nny1vz6Zd8YdyqDw2nwcZTvGwaAg6AxtVFKTY0oaJKkMVCEiBEz0wbNHNXcyw0njq4CTVYXKMbc
+				W5VI6pGwAIYsgLW3LcmgmIgijux6Id9OBjA2s7KeSbAeSB9nkBarSYv9Z/4UWlxBCl+hd2DFP5f6
+				MRdgEOMAiH3sF9/O6tvJn/HIMcXmorNHIxBYwkENGsSNZQY0TEk6Mjt/r1eZJBLWRjaSkGUyQZ5m
+				sGHWsJrf5xx7AXHQtGv31YefDWqT5DwsxcGPmuMqY2ST0plqQm12T3xRQkFM78D2tBRLA6gHNNjW
+				N8wSaGFu3L7Snj1QokCXAxwFVYPdL1zfXGCYqwKhAGbZRS/8H7qZWi4NggBnVpUEuGLc9OKg3OMD
+				/iZKgE0Mv1L38ZLOFt4ltjuT34AsfrILGJBENhzmWElzh2f1zRAnYRu5a0E6BqEK|
+			)
+			(checksum "87673E70F62D676C1F88A36BE3EA9AEA")
+		)
+	)
+)

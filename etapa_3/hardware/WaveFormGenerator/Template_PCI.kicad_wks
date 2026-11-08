@@ -1,0 +1,207 @@
+(kicad_wks
+	(version 20231118)
+	(generator "pl_editor")
+	(generator_version "8.0")
+	(setup
+		(textsize 1.5 1.5)
+		(linewidth 0.254)
+		(textlinewidth 0.15)
+		(left_margin 10)
+		(right_margin 10)
+		(top_margin 10)
+		(bottom_margin 10)
+	)
+	(rect
+		(name "")
+		(start 110.269 22.842)
+		(end 2 2)
+	)
+	(rect
+		(name "")
+		(start 0 0 ltcorner)
+		(end 0 0)
+		(repeat 2)
+		(incrx 2)
+		(incry 2)
+	)
+	(line
+		(name "")
+		(start 50 2 ltcorner)
+		(end 50 0 ltcorner)
+		(repeat 30)
+		(incrx 50)
+	)
+	(tbtext "1"
+		(name "")
+		(pos 25 1 ltcorner)
+		(font
+			(face "Cambria")
+			(size 1.3 1.3) bold)
+		(repeat 100)
+		(incrx 50)
+	)
+	(line
+		(name "")
+		(start 50 2 lbcorner)
+		(end 50 0 lbcorner)
+		(repeat 30)
+		(incrx 50)
+	)
+	(tbtext "1"
+		(name "")
+		(pos 25 1 lbcorner)
+		(font
+			(face "Cambria")
+			(size 1.3 1.3)
+		)
+		(repeat 100)
+		(incrx 50)
+	)
+	(line
+		(name "")
+		(start 0 50 ltcorner)
+		(end 2 50 ltcorner)
+		(repeat 30)
+		(incry 50)
+	)
+	(tbtext "A"
+		(name "")
+		(pos 1 25 ltcorner)
+		(font
+			(face "Cambria")
+			(size 1.3 1.3)
+		)
+		(justify center)
+		(repeat 100)
+		(incry 50)
+	)
+	(line
+		(name "")
+		(start 0 50 rtcorner)
+		(end 2 50 rtcorner)
+		(repeat 30)
+		(incry 50)
+	)
+	(tbtext "A"
+		(name "")
+		(pos 1 25 rtcorner)
+		(font
+			(face "Cambria")
+			(size 1.3 1.3)
+		)
+		(justify center)
+		(repeat 100)
+		(incry 50)
+	)
+	(tbtext "Date: ${ISSUE_DATE}"
+		(name "")
+		(pos 87.508 7.154)
+		(font
+			(face "Cambria")
+		)
+	)
+	(line
+		(name "")
+		(start 110.269 5.5702)
+		(end 2.065 5.5702)
+	)
+	(tbtext "${KICAD_VERSION}"
+		(name "")
+		(pos 109 3.846)
+		(font
+			(face "Cambria")
+			(color 0 0 0 1)
+		)
+		(comment "Kicad version")
+	)
+	(line
+		(name "")
+		(start 110.269 8.6182)
+		(end 2.065 8.6182)
+	)
+	(tbtext "Rev: ${REVISION}"
+		(name "")
+		(pos 24.254 7.154)
+		(font
+			(face "Cambria") bold)
+	)
+	(tbtext "Size: ${PAPER}"
+		(name "")
+		(pos 109 7.154)
+		(font
+			(face "Cambria")
+		)
+		(comment "Paper format name")
+	)
+	(tbtext "Id: ${#}/${##}"
+		(name "")
+		(pos 24.254 3.846)
+		(font
+			(face "Cambria")
+			(color 0 0 0 1)
+		)
+		(comment "Sheet id")
+	)
+	(line
+		(name "")
+		(start 110.269 12.4282)
+		(end 2.065 12.4282)
+	)
+	(tbtext "Title: ${TITLE}"
+		(name "")
+		(pos 109 10.7)
+		(font
+			(face "Cambria")
+			(size 2 2) bold italic)
+	)
+	(tbtext "File: ${FILENAME}"
+		(name "")
+		(pos 109 14.3)
+		(font
+			(face "Cambria")
+			(color 0 0 0 1)
+		)
+	)
+	(line
+		(name "")
+		(start 110.269 19.0322)
+		(end 2.065 19.0322)
+	)
+	(tbtext "Sheet: ${SHEETPATH}"
+		(name "")
+		(pos 109 17.254)
+		(font
+			(face "Cambria")
+			(color 0 0 0 1)
+		)
+	)
+	(tbtext "${COMPANY}"
+		(name "")
+		(pos 109 21.016)
+		(font
+			(face "Cambria") bold
+			(color 0 0 132 1)
+		)
+		(comment "Company name")
+	)
+	(line
+		(name "")
+		(start 89.949 8.4912)
+		(end 89.949 5.5702)
+	)
+	(line
+		(name "")
+		(start 26 8.5)
+		(end 26 2)
+	)
+	(rect
+		(name "")
+		(start 110.777 23.35)
+		(end 1.989 2.002)
+	)
+	(line
+		(name "")
+		(start 89.949 8.4912)
+		(end 89.949 5.5702)
+	)
+)
