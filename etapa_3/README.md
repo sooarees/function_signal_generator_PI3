@@ -40,9 +40,10 @@ O último bloco analógico do gerador é responsável por duas funções: amplif
 
 Todos os amplificadores operacionais são do tipo TL074 (JFET), alimentados em ±12 V. O circuito completo, utilizado na simulação, é mostrado na Figura 1.
 
-![Figura 1 — Circuito de offset e amplificação simulado no LTspice](imagens/fig_offset_amplificador_ltspice.png)
-
-*Figura 1 — Circuito de geração de offset (U3, U4, U5 e U2) e amplificador somador de saída (U1), simulado no LTspice.*
+<p align="center">
+  <img src="../images/Etapa03_OffsetAmplificador_LTspice.png" alt="Circuito de offset e amplificação simulado no LTspice" width="700">
+</p>
+<p align="center"><em>Figura 1 — Circuito de geração de offset (U3, U4, U5 e U2) e amplificador somador de saída (U1), simulado no LTspice.</em></p>
 
 ### 4.1. Geração da tensão de offset
 
@@ -134,23 +135,27 @@ e a saída esperada é uma senoide de $3{,}6 \cdot 1 = 3{,}6\ \text{V}$ de pico,
 
 O circuito foi montado em protoboard, conforme a Figura 2, e alimentado com fonte simétrica de ±12 V. Como sinal de entrada, utilizou-se um gerador de funções com senoide de aproximadamente 2,08 V pico a pico e 4,5 kHz. Nas medições, o canal 1 (amarelo) corresponde ao sinal de entrada e o canal 2 (azul) à saída do amplificador.
 
-![Figura 2 — Montagem do circuito em protoboard](imagens/fig_montagem_protoboard.jpg)
-
-*Figura 2 — Montagem em protoboard dos estágios de offset e amplificação.*
+<p align="center">
+  <img src="../images/Etapa03_OffsetAmplificador_Bancada.jpeg" alt="Montagem do circuito de offset e amplificação em protoboard" width="500">
+</p>
+<p align="center"><em>Figura 2 — Montagem em protoboard dos estágios de offset e amplificação.</em></p>
 
 As Figuras 3, 4 e 5 mostram a saída para três valores de offset: negativo, positivo e nulo. Em todos os casos, a amplitude de saída é de 6,56 V pico a pico, e apenas o nível DC da forma de onda é deslocado, o que confirma o funcionamento independente das duas entradas do somador.
 
-![Figura 3 — Saída com offset negativo](imagens/fig_osc_offset_negativo.jpg)
+<p align="center">
+  <img src="../images/Etapa03_OffsetAmplificador_OffsetNegativo.jpeg" alt="Saída do amplificador com offset negativo" width="500">
+</p>
+<p align="center"><em>Figura 3 — Saída com offset negativo (aproximadamente −2 V). CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.</em></p>
 
-*Figura 3 — Saída com offset negativo (aproximadamente −2 V). CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.*
+<p align="center">
+  <img src="../images/Etapa03_OffsetAmplificador_OffsetPositivo.jpeg" alt="Saída do amplificador com offset positivo" width="500">
+</p>
+<p align="center"><em>Figura 4 — Saída com offset positivo (aproximadamente +2 V). CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.</em></p>
 
-![Figura 4 — Saída com offset positivo](imagens/fig_osc_offset_positivo.jpg)
-
-*Figura 4 — Saída com offset positivo (aproximadamente +2 V). CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.*
-
-![Figura 5 — Saída com offset nulo](imagens/fig_osc_offset_zero.jpg)
-
-*Figura 5 — Saída com offset nulo. CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.*
+<p align="center">
+  <img src="../images/Etapa03_OffsetAmplificador_OffsetNulo.jpeg" alt="Saída do amplificador com offset nulo" width="500">
+</p>
+<p align="center"><em>Figura 5 — Saída com offset nulo. CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.</em></p>
 
 O ganho medido do sinal foi:
 
