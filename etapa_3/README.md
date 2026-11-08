@@ -21,7 +21,7 @@ A onda dente de serra é produzida a partir de duas ondas triangulares defasadas
 O protótipo de bancada comprovou a viabilidade prática da topologia, como ilustrado na imagem a seguir:
 
 <p align="center">
-  <img src="../images/Etapa03_GeradorTriangDenteDeSerra_Bancada.png" alt="Protótipo do gerador em bancada" width="500">
+  <img src="../images/Etapa03_GeradorTriangDenteDeSerra_Bancada.jpeg" alt="Protótipo do gerador em bancada" width="500">
 </p>
 <p align="center"><em>Montagem experimental do estágio analógico gerador de sinais não senoidais.</em></p>
 
