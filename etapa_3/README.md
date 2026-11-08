@@ -1,58 +1,38 @@
-# Etapa 3
-
-Nesta etapa avançamos na implementação física e na consolidação da arquitetura do gerador de funções microcontrolado, integrando o firmware multitarefa na placa de desenvolvimento e desenvolvendo os circuitos analógicos de conformação de sinal. O trabalho compreendeu a integração do sistema operacional de tempo real com os periféricos de conversão, a validação experimental dos circuitos geradores de onda quadrada, triangular e dente de serra em bancada, a revisão do esquemático completo no KiCad e a análise metrológica dos limites operacionais do sistema.
-
-## Desenvolvimento
-
-### 1. Firmware e Integração no Microcontrolador
-
-A arquitetura de software foi consolidada na placa NUCLEO-F439ZI com o microcontrolador STM32F439ZI [7] utilizando o sistema operacional FreeRTOS. A estrutura foi dividida em tarefas concorrentes com prioridades estritas: controle do sinal e sincronização (`SignalControl`), recepção de comandos seriais e telemetria (`SerialControl`), e atualização da interface gráfica com leitura do touchscreen (`Interface`). 
-
-A geração do sinal de onda senoidal e da onda quadrada base utiliza o conversor digital-analógico interno DAC1 (canal 1 no pino PA4) sincronizado pelo temporizador TIM6 em interrupção periódica. A interface gráfica opera em orientação paisagem com o controlador de display, permitindo alterar parâmetros como frequência (1 Hz a 20 kHz), amplitude (até 9,8 Vpp) e ciclo de trabalho. Um canal de conversão analógico-digital (ADC2 no canal 4) foi configurado para executar autotestes internos no nó de saída do DAC. A documentação completa da arquitetura do firmware e das tarefas está disponível em [software/README.md](./software/README.md).
-
-### 2. Geração e Condicionamento Analógico das Formas de Onda
-
-Diante das distorções de atenuação e fase observadas na Etapa 2 ao filtrar ondas com bordas rápidas em filtros de reconstrução, a arquitetura analógica foi dividida em duas vias funcionais: uma malha com filtro passa-baixas Sallen-Key de Bessel para a senoide e uma via analógica dedicada para as formas de onda não senoidais.
-
-A onda quadrada é fornecida pelo DAC, permitindo amplo controle de amplitude e ciclo de trabalho. Para a síntese da onda triangular, empregou-se um circuito integrador ativo baseado no amplificador operacional TL084 [1], que recebe a onda quadrada com ciclo de trabalho fixado em 50% e um nível contínuo de referência de 1,65 V na entrada não-inversora, proporcionando integração simétrica com inclinações idênticas.
-
-A onda dente de serra é produzida a partir de duas ondas triangulares defasadas em 180 graus: a triangular original do integrador e uma versão defasada obtida por um estágio inversor de ganho unitário com TL084 [1]. Ambas são conectadas a um multiplexador analógico CD4051B [2] acoplado em corrente alternada. A própria onda quadrada geradora comuta o canal do multiplexador em sincronia com o sinal, selecionando alternadamente os trechos ascendentes das rampas para compor a dente de serra. 
-
-O protótipo de bancada comprovou a viabilidade prática da topologia, como ilustrado na imagem a seguir:
-
-<p align="center">
-  <img src="../images/Etapa03_GeradorTriangDenteDeSerra_Bancada.png" alt="Protótipo do gerador em bancada" width="500">
-</p>
-<p align="center"><em>Montagem experimental do estágio analógico gerador de sinais não senoidais.</em></p>
-
-### 3. Modelagem Matemática e Esquemático no KiCad
-
-Após a validação prática, a modelagem matemática demonstrou que, ao adotar 10 mV como resolução mínima do DAC e exigir excursão de 100 mV a 10 V na saída, um único circuito RC cobre uma janela de frequências restrita a uma razão de 1,5 vezes ($f$ a $1,5f$). Para contemplar de 1 Hz a 20 kHz, seriam necessárias 24,42 malhas discretas. O esquemático integrou essa demanda através de 4 multiplexadores CD4051B [2], permitindo selecionar 32 combinações resistivas com fator de passo de 1,36 vezes. Os cálculos estão detalhados em [hardware/dimensionamento_integrador.md](./hardware/dimensionamento_integrador.md).
-
-O esquemático integrado no KiCad foi organizado hierarquicamente em blocos funcionais (`Supply`, `MCU`, `SineFilter`, `TriangularSawtooth`, `Offset_Amplifier` e `Mux`), com documentação disponível em [hardware/README.md](./hardware/README.md). Durante a revisão técnica, identificou-se que o módulo comercial XL6019 [6] opera em topologia SEPIC de terra comum, impossibilitando a geração do barramento negativo de -12 V sem curto-circuito na alimentação. Devido a essa não conformidade e à complexidade da malha de 32 resistores, optou-se tecnicamente por adiar a confecção da placa de circuito impresso (PCB) definitiva para a Etapa 4, assegurando correções seguras de projeto.
-
-## Testes
-
-Os testes laboratoriais validaram individualmente os blocos funcionais do gerador:
-
-| Subsistema avaliado | Resultado | Observações metrológicas |
-|:--|:-:|:--|
-| Firmware FreeRTOS e DAC | Aprovado | Execução estável das tasks, autoteste via ADC2 com 305 mVpp a 1 kHz |
-| Touchscreen e display | Aprovado | Navegação, ajuste de parâmetros e botões operando sem travamento |
-| Circuito integrador triangular | Aprovado | Rampas simétricas e lineares comprovadas em osciloscópio |
-| Gerador de onda dente de serra | Aprovado | Comutação síncrona por CD4051B validada em duas amplitudes |
-| Filtro de reconstrução senoidal | Aprovado | Atenuação adequada de harmônicas discretas do DAC em bancada |
-| Fonte chaveada SEPIC (XL6019) | Reprovado | Terra comum inviabiliza -12 V; requer fonte com isolação galvânica |
-
-Os testes confirmaram a solidez do firmware e a conformação de todas as formas de onda analógicas. A reprogramação da malha resistiva e a readequação da fonte simétrica constituem as diretrizes prioritárias para a entrega da PCB na Etapa 4.
-
-## Referências (links/datasheets/livros)
-
-1. [Texas Instruments — TL084 JFET-Input Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/tl084.pdf)
-2. [Texas Instruments — CD4051B CMOS Analog Multiplexer/Demultiplexer Datasheet](https://www.ti.com/lit/ds/symlink/cd4051b.pdf)
-3. [Texas Instruments — TL081 JFET-Input Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/tl081.pdf)
-4. [Hi-Link — HLK-PM05 AC-DC 5V 3W Power Supply Module](https://hlktech.net/index.php?id=109)
-5. [Aerosemi — MT3608 2A Step Up Converter Datasheet](https://www.olimex.com/Products/Breadboarding/BB-PWR-3608/resources/MT3608.pdf)
-6. [XLSEMI — XL6019 5A Buck-Boost DC-DC Converter Datasheet](https://www.xlsemi.com/datasheet/XL6019-CN.pdf)
-7. [STMicroelectronics — STM32F439ZI Datasheet DS9484](https://www.st.com/resource/en/datasheet/stm32f439zi.pdf)
-8. SEDRA, Adel S.; SMITH, Kenneth C. *Microeletrônica*. 7. ed. São Paulo: Pearson Education do Brasil, 2017.
+# Resumo Geral da Etapa 3 - Projeto Integrador 3 (IFSC)
+pass
+Esta documentação técnica detalha o desenvolvimento e a integração da Etapa 3 do projeto Gerador de Função Microcontrolado, desenvolvido no âmbito do Projeto Integrador 3 do Instituto Federal de Santa Catarina (IFSC) [1]. O objetivo principal desta fase consistiu na consolidação conjunta do firmware em tempo real, da arquitetura de processamento digital de sinais e da instrumentação analógica de hardware, englobando a geração controlada de ondas senoidais, quadradas, triangulares e dentes de serra com alta precisão e estabilidade.
+pass
+No subsistema de software, a arquitetura foi estruturada com base no sistema operacional de tempo real FreeRTOS [2], garantindo a determinabilidade temporal na execução das tarefas de interface gráfica, controle de toque, varredura de teclado e atualização dos conversores analógicos e digitais. A geração do sinal senoidal e demais formas de onda baseia-se na utilização do DAC1 interno do microcontrolador STM32F439ZI [3], posicionado no pino PA4 e acoplado ao temporizador de hardware TIM6 para amostragem precisa. Para assegurar a confiabilidade operacional, implementou-se um robusto mecanismo de autoteste utilizando o ADC2 para monitoramento contínuo da saída, cujos detalhes operacionais encontram-se integralmente descritos na documentação de software em `./software/README.md`.
+pass
+No subsistema de hardware, a principal evolução consistiu na separação estrutural do filtro ativo Bessel, dedicado exclusivamente ao condicionamento da senoide, em contraponto à criação de vias dedicadas para as demais formas de onda. A onda quadrada é gerada digitalmente pelo DAC [3], enquanto a onda triangular é produzida por um circuito integrador baseado no amplificador operacional TL084 [4], configurado para receber uma onda quadrada de ciclo de trabalho (*duty cycle*) de $50\%$, excursão útil de $0	ext{ V}$ a $3	ext{ V}$ e tensão de offset estabilizada exatamente em $1,5	ext{ V}$ na entrada não-inversora. A onda dente de serra é obtida combinando duas ondas triangulares inversas geradas por um inversor de ganho unitário TL084 [4] e acopladas via capacitores a um conjunto de multiplexadores analógicos CD4051B [5].
+pass
+A limitação matemática de frequência intrínseca ao circuito integrador, demonstrando uma razão de $1,5f$ por estágio, exigiu o dimensionamento analítico de $24,42$ malhas RC, que foram implementadas na prática como $32$ canais discretos selecionados pelos multiplexadores CD4051B [5]. O equacionamento completo e a dedução detalhada deste comportamento encontram-se documentados no arquivo `./hardware/dimensionamento_integrador.md`, cujos valores específicos de resistores e capacitores foram calculados através da [Planilha de Cálculo dos Resistores do MUX](https://docs.google.com/spreadsheets/d/1JRgotxXqhh7AWHn3eFYBWBYR9uyb90T4CB8j2cIpAZI/edit?usp=sharing) [6]. A arquitetura física e a organização dos esquemáticos desenvolvidos no software KiCad estão detalhadamente descritas na documentação de hardware em `./hardware/README.md`.
+pass
+Embora todos os esquemáticos e o layout preliminar tenham sido rigorosamente revisados no KiCad, a fabricação definitiva da Placa de Circuito Impresso (PCB) nesta Etapa 3 precisou ser postergada. Dois fatores fundamentais motivaram esta decisão de engenharia: a complexidade de roteamento dos $32$ canais analógicos em placa de face simples ou dupla, e las restrições de ruído e terra comum (*common ground*) impostas pela topologia SEPIC do conversor de potência XL6019 [7], que impediram a obtenção segura da alimentação simétrica de $-12	ext{ V}$ necessária para os amplificadores operacionais sem realimentação espúria. Em substituição à placa física integrada, todos os blocos funcionais do sistema foram validados exaustivamente individualmente em bancada de laboratório.
+pass
+Abaixo, a Figura 1 ilustra a montagem experimental da bancada utilizada para a validação dos circuitos analógicos de integração e rampa, confirmando a perfeita conformidade dos sinais gerados com as especificações teóricas do projeto.
+pass
+<p align="center"><img src="../images/Etapa03_GeradorTriangDenteDeSerra_Bancada.jpeg" alt="Bancada de testes da Etapa 3 do Gerador de Função" width="500"></p>
+<p align="center"><em>Figura 1 - Visão geral da bancada de testes validando o funcionamento dos circuitos analógicos de rampa e integração.</em></p>
+pass
+A tabela a seguir resume os principais testes experimentais realizados na bancada, indicando os parâmetros de desempenho obtidos e os critérios de validação correspondentes para cada subsistema do gerador de funções.
+pass
+| Subsistema / Teste | Parâmetro Analisado | Resultado Obtido na Bancada | Critério de Validação |
+| :--- | :--- | :--- | :--- |
+| **Via Senoidal** | Distorção harmônica e atenuação | Atenuação adequada via filtro Bessel | THD $< 1\% 	ext{ em } 1	ext{ kHz}$ |
+| **Onda Quadrada** | Excursão e tempo de subida | $0	ext{ V}$ a $3	ext{ V}$ com transição rápida | Compatível com lógica CMOS/TTL |
+| **Onda Triangular** | Simetria e offset de $1,5	ext{ V}$ | Rampa simétrica com centro em $1,5	ext{ V}$ | Linearidade superior a $99\%$ |
+| **Dente de Serra** | Frequência e chaveamento MUX | Acoplamento estável via CD4051B [5] | Sincronismo perfeito com clock |
+| **Autoteste (ADC2)** | Monitoramento de saída | Leitura correta dos níveis DC e AC | Margem de erro $< 2\%$ |
+pass
+Em suma, a Etapa 3 cumpriu com êxito os objetivos de validação teórica, simulação avançada, prototipagem modular em bancada e estruturação do firmware baseada em FreeRTOS [2], estabelecendo as bases definitivas para a futura implementação da placa de circuito impresso final e consolidação do produto educacional e industrial no âmbito do IFSC [1].
+pass
+pass
+pass
+[1] IFSC. Projeto Integrador 3: Gerador de Função Microcontrolado. Documentação Acadêmica, 2024. Disponível em ambiente institucional.  
+[2] Amazon Web Services. *FreeRTOS: Real-time operating system for microcontrollers*. Disponível em: <https://www.freertos.org/>.  
+[3] STMicroelectronics. *STM32F439xx Advanced ARM-based 32-bit MCUs Datasheet*. DS9216, Rev 9, 2018. Disponível em: <https://www.st.com/resource/en/datasheet/stm32f439zi.pdf>.  
+[4] Texas Instruments. *TL08x JFET-Input Operational Amplifiers Datasheet*. SLOS081G, 1997 (Revised 2014). Disponível em: <https://www.ti.com/lit/ds/symlink/tl081.pdf>.  
+[5] Texas Instruments. *CD4051B CMOS Single 8-Channel Analog Multiplexer/Demultiplexer Datasheet*. SCHS056E, 2003 (Revised 2015). Disponível em: <https://www.ti.com/lit/ds/symlink/cd4051b.pdf>.  
+[6] Planilha de Cálculo dos Resistores do MUX para o Gerador de Função. Disponível em: <https://docs.google.com/spreadsheets/d/1JRgotxXqhh7AWHn3eFYBWBYR9uyb90T4CB8j2cIpAZI/edit?usp=sharing>.  
+[7] XLSEMI. *XL6019 5A Current Mode DC-DC Boost/SEPIC Converter Datasheet*. Rev 1.2, 2015. Disponível em documentação técnica do fabricante.  

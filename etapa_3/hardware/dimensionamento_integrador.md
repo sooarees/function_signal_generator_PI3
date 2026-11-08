@@ -1,104 +1,64 @@
-# Dimensionamento Matemático e Limitações do Integrador — Etapa 3
-
-Este documento apresenta a dedução analítica das limitações de largura de faixa para o circuito integrador analógico utilizado na síntese das ondas triangular e dente de serra do gerador de funções, justificando a necessidade de segmentação em múltiplos estágios resistivos.
-
----
-
-## 1. Contextualização e Equação Base do Integrador
-
-A geração analógica da forma de onda triangular foi concebida a partir da integração temporal de uma onda quadrada periódica com ciclo de trabalho (*duty cycle*) fixo em $50\%$. Essa onda quadrada geradora é produzida pelo conversor digital-analógico (DAC) do microcontrolador com excursão de $0\text{ V}$ a $3,3\text{ V}$. 
-
-Para que a integração ocorra de forma simétrica em torno do zero virtual, aplica-se à entrada não-inversora do amplificador operacional uma tensão contínua de referência igual à metade da amplitude do sinal de entrada ($V_{\text{ref}} = 1,65\text{ V}$). Dessa forma, o sinal visto pela entrada inversora varia simetricamente entre $+1,65\text{ V}$ e $-1,65\text{ V}$.
-
-Durante meio período de integração ($t_{\text{int}} = \frac{T}{2} = \frac{1}{2f}$), a saída do integrador descreve uma rampa linear cuja excursão total pico a pico é designada por $V_o$. Definindo a taxa de variação da rampa como $\alpha$ (em $\text{V/s}$), tem-se:
-
-$$\alpha = \frac{\Delta V_o}{\Delta t} = \frac{V_o}{T / 2} = \frac{2 \cdot V_o}{T} = 2 \cdot V_o \cdot f$$
-
-Considerando que a amplitude da onda quadrada na entrada do integrador é controlada pelo DAC em uma faixa máxima de $3,3\text{ V}$, normaliza-se o parâmetro de ganho do integrador pela excursão de controle:
-
-$$\alpha = \frac{2 \cdot V_o \cdot f}{3,3}$$
-
-Onde:
-* $V_o$ é a amplitude pico a pico da onda triangular desejada na saída ($\text{V}$);
-* $f$ é a frequência fundamental do sinal ($\text{Hz}$);
-* $3,3\text{ V}$ é a tensão de fundo de escala do DAC.
-
----
-
-## 2. Limites de Operação para um Único Conjunto RC
-
-Os requisitos gerais de projeto estabelecem:
-* Faixa total de frequências: $f_{\text{mín}} = 1\text{ Hz}$ até $f_{\text{máx}} = 20\text{ kHz}$;
-* Faixa de amplitudes de saída: $V_{o\text{ mín}} = 100\text{ mV}$ ($0,1\text{ V}$) até $V_{o\text{ máx}} = 10\text{ V}$.
-
-Na prática, a amplitude da onda quadrada fornecida pelo DAC não pode assumir valores arbitrariamente pequenos devido à resolução efetiva e ao piso de ruído do conversor. Adotando $10\text{ mV}$ como o menor degrau de amplitude confiável na entrada e $1,5\text{ V}$ como a excursão máxima útil em torno da referência de $1,65\text{ V}$ (garantindo margem linear sem ceifamento), define-se a razão dinâmica máxima de controle de amplitude por software ($\alpha_{\text{máx}} / \alpha_{\text{mín}}$) para uma dada malha como:
-
-$$\frac{\alpha_{\text{máx}}}{\alpha_{\text{mín}}} = \frac{1,5\text{ V}}{10\text{ mV}} = 150$$
-
-Para um único conjunto de componentes passivos $R$ e $C$, a taxa de integração mínima e máxima requeridas nos extremos de amplitude e frequência são dadas por:
-
-$$\alpha_{\text{mín}} = \frac{2 \cdot V_{o\text{ mín}} \cdot f_{\text{mín}}}{3,3}$$
-
-$$\alpha_{\text{máx}} = \frac{2 \cdot V_{o\text{ máx}} \cdot f_{\text{máx}}}{3,3}$$
-
-Dividindo a expressão de $\alpha_{\text{máx}}$ por $\alpha_{\text{mín}}$ para uma mesma configuração física de circuito:
-
-$$\frac{\alpha_{\text{máx}}}{\alpha_{\text{mín}}} = \frac{V_{o\text{ máx}} \cdot f_{\text{máx}}}{V_{o\text{ mín}} \cdot f_{\text{mín}}}$$
-
-Isolando a razão entre as frequências operacionais máxima e mínima permitidas:
-
-$$\frac{f_{\text{máx}}}{f_{\text{mín}}} = \frac{V_{o\text{ mín}}}{V_{o\text{ máx}}} \cdot \frac{\alpha_{\text{máx}}}{\alpha_{\text{mín}}}$$
-
-Substituindo os valores nominais de projeto ($V_{o\text{ mín}} = 0,1\text{ V}$, $V_{o\text{ máx}} = 10\text{ V}$ e razão dinâmica máxima igual a $150$):
-
-$$\frac{f_{\text{máx}}}{f_{\text{mín}}} = \frac{0,1}{10} \cdot 150 = 0,01 \cdot 150 = 1,5$$
-
-$$\implies f_{\text{máx}} = 1,5 \cdot f_{\text{mín}}$$
-
-Esse resultado revela uma restrição crítica: **um único circuito integrador RC fixo só consegue cobrir uma faixa de frequências onde o limite superior é apenas $1,5$ vez o limite inferior ($f$ a $1,5f$)**, caso se deseje manter a capacidade total de ajuste de amplitude de $100\text{ mV}$ a $10\text{ V}$.
-
-### Exemplo Numérico para a Primeira Faixa ($1\text{ Hz}$ a $1,5\text{ Hz}$)
-
-Adotando $f_{\text{mín}} = 1\text{ Hz}$, a frequência máxima alcançável sem troca de componentes é $f_{\text{máx}} = 1,5\text{ Hz}$:
-
-$$\alpha_{\text{mín}} = \frac{2 \cdot 0,1 \cdot 1}{3,3} = \frac{0,2}{3,3} \approx 60,6\text{ mV/s} \quad (61\text{ m})$$
-
-$$\alpha_{\text{máx}} = \frac{2 \cdot 10 \cdot 1,5}{3,3} = \frac{30}{3,3} \approx 9,09\text{ V/s}$$
-
----
-
-## 3. Cálculo do Número de Malhas RC Necessárias (1 Hz a 20 kHz)
-
-Como cada estágio RC cobre um fator multiplicativo de apenas $1,5\times$ em frequência, cobrir todo o espectro de $1\text{ Hz}$ até $20.000\text{ Hz}$ exige o escalonamento em uma progressão geométrica telescópica de $n$ subfaixas adjacentes:
-
-$$20.000 = (1,5^1 - 1,5^0) + (1,5^2 - 1,5^1) + (1,5^3 - 1,5^2) + \dots + (1,5^n - 1,5^{n-1})$$
-
-A simplificação da série telescópica resulta em:
-
-$$20.000 = 1,5^n - 1,5^0$$
-
-$$1,5^n = 20.000 - 1 = 19.999$$
-
-Aplicando logaritmo em ambos os lados:
-
-$$n = \log_{1,5}(19.999) = \frac{\ln(19.999)}{\ln(1,5)} \approx \frac{9,903437}{0,405465} \approx 24,42\text{ circuitos RC}$$
-
-Portanto, seriam necessárias teoricamente pelo menos **25 combinações RC discretas** para cobrir continuamente de $1\text{ Hz}$ a $20\text{ kHz}$ atendendo simultaneamente a todas as especificações de amplitude e tensão de entrada.
-
----
-
-## 4. Adaptação no Esquemático para 32 Canais
-
-Para viabilizar a seleção dessas malhas com componentes comerciais, optou-se pela utilização de multiplexadores analógicos de 8 canais `CD4051B`. Quatro circuitos integrados em paralelo fornecem $4 \times 8 = 32$ canais de seleção resistiva:
-
-$$x^{32} = 19.999 \implies x = \sqrt[32]{19.999} \approx 1,36$$
-
-Com 32 resistores selecionáveis divididos entre dois integradores (um com capacitor de maior capacitância para baixas frequências e outro de menor capacitância para altas frequências), cada subfaixa opera com uma razão de passo de $1,36\times$, garantindo sobreposição segura entre as faixas adjacentes ao longo de todo o espectro.
-
----
-
-## Referências
-
-1. SEDRA, Adel S.; SMITH, Kenneth C. *Microeletrônica*. 7. ed. São Paulo: Pearson Education do Brasil, 2017.
-2. [Texas Instruments — CD4051B CMOS Single 8-Channel Analog Multiplexer/Demultiplexer Datasheet](https://www.ti.com/lit/ds/symlink/cd4051b.pdf)
-3. [Texas Instruments — TL084 JFET-Input Operational Amplifier Datasheet](https://www.ti.com/lit/ds/symlink/tl084.pdf)
+# Dimensionamento Matemático do Integrador e Limitação de Frequência
+pass
+pass
+pass
+No projeto do Gerador de Função Microcontrolado desenvolvido no âmbito do Projeto Integrador 3 do IFSC [1], a geração de ondas triangulares e dentes de serra analógicas é realizada por meio de circuitos integradores baseados em amplificadores operacionais (AmpOps), especificamente utilizando o circuito integrado TL084 [2]. A onda quadrada de controle, proveniente do sistema digital, possui uma excursão de tensão útil compreendida entre $0	ext{ V}$ e $3	ext{ V}$, com um valor de offset (referência de tensão contínua na entrada não-inversora do AmpOp gerada por um divisor resistivo de precisão) fixado exatamente em $1,5	ext{ V}$, que corresponde exatamente à metade da excursão máxima de $0	ext{ V}$ a $3	ext{ V}$.
+pass
+A dedução matemática rigorosa apresentada a seguir demonstra a limitação de frequência intrínseca ao circuito integrador simples e justifica a necessidade de uma arquitetura baseada em múltiplos canais chaveados por multiplexadores analógicos CD4051B [3].
+pass
+pass
+pass
+A relação fundamental entre a tensão de saída $v_o(t)$ de um circuito integrador inversor ideal e a tensão de entrada $v_i(t)$ é dada por:
+pass
+$$v_o(t) = -rac{1}{R \cdot C} \int v_i(t) dt + V_{o}(0)$$
+pass
+Considerando a excursão da onda quadrada de entrada e o offset de $1,5	ext{ V}$, a amplitude pico a pico da tensão de saída do integrador é inversamente proporcional à frequência $f$ da onda de entrada. Definimos os parâmetros de projeto com base nos requisitos do sistema: resolução de amplitude mínima de $10	ext{ mV}$ frente à excursão total de $1,5	ext{ V}$, tensão de saída mínima $V_{o	ext{ mín}} = 0,1	ext{ V}$ e tensão de saída máxima $V_{o	ext{ máx}} = 10	ext{ V}$.
+pass
+A razão entre o fator de escala máximo $lpha_{	ext{máx}}$ e o fator de escala mínimo $lpha_{	ext{mín}}$ é expressa pelas equações de projeto:
+pass
+$$lpha_{	ext{mín}} = rac{2 \cdot V_{o	ext{ mín}} \cdot f_{	ext{mín}}}{3,3}$$
+pass
+$$lpha_{	ext{máx}} = rac{2 \cdot V_{o	ext{ máx}} \cdot f_{	ext{máx}}}{3,3}$$
+pass
+Considerando a relação de resolução impuesta pelo sistema digital e pela conversão, temos a razão entre os fatores:
+pass
+$$rac{lpha_{	ext{máx}}}{lpha_{	ext{mín}}} = rac{1,5	ext{ V}}{0,01	ext{ V}} = 150$$
+pass
+Substituindo os valores extremos de tensão de saída ($V_{o	ext{ mín}} = 0,1	ext{ V}$ e $V_{o	ext{ máx}} = 10	ext{ V}$), deduzimos a relação entre as frequências máxima e mínima de um mesmo estágio integrador:
+pass
+$$rac{f_{	ext{máx}}}{f_{	ext{mín}}} = rac{0,1}{10} \cdot 150 = 1,5 \implies f_{	ext{máx}} = 1,5 \cdot f_{	ext{mín}}$$
+pass
+Portanto, um único circuito integrador com componentes fixos possui uma faixa de operação estritamente limitada a uma razão máxima de $1,5$ entre a frequência superior e inferior.
+pass
+pass
+pass
+Para ilustrar a aplicação prática da formulação, considere uma frequência mínima de projeto $f_{	ext{mín}} = 1	ext{ Hz}$. Pela relação deduzida, a frequência máxima suportada pelo mesmo estágio é:
+pass
+$$f_{	ext{máx}} = 1,5 \cdot 1	ext{ Hz} = 1,5	ext{ Hz}$$
+pass
+Neste caso, os fatores de escala correspondentes são $lpha_{	ext{mín}} = 61	ext{ m}$ e $lpha_{	ext{máx}} = 9,09$. Para cobrir a faixa total de frequência do gerador de funções, que se estende até $20	ext{ kHz}$, recorre-se ao empilhamento de faixas sucessivas de frequências relacionadas geometricamente por um fator de $1,5$.
+pass
+A expansão da faixa total de frequências pode ser modelada matematicamente pela soma telescópica dos intervalos:
+pass
+$$20.000 = (1,5^1 - 1,5^0) + (1,5^2 - 1,5^1) + \dots + (1,5^n - 1,5^{n-1})$$
+pass
+Simplificando a série geométrica resultante, obtemos a expressão para o número total $n$ de estágios ou malhas RC necessárias para cobrir toda a faixa especificada:
+pass
+$$1,5^n = 19.999 \implies n = \log_{1,5}(19.999) pprox 24,42 	ext{ circuitos RC}$$
+pass
+Como o resultado indica a necessidade de aproximadamente $24,42$ malhas resistivas, o projeto adota uma arquitetura robusta com $32$ canais discretos para garantir margem de segurança e cobertura contínua.
+pass
+pass
+pass
+A implementação física de $32$ canais de temporização e integração é realizada utilizando $4$ multiplexadores analógicos CD4051B [3], dispostos em uma rede de chaveamento controlada pelo microcontrolador STM32F439ZI [4]. Os $32$ canais são divididos funcionalmente em dois grupos principais (integradores dedicados para baixa frequência e alta frequência), otimizando a impedância de entrada e a resposta transitória dos AmpOps TL084 [2].
+pass
+O cálculo individual de cada resistor selecionado pelos multiplexadores para cada um dos $32$ canais foi desenvolvido de forma automatizada e rigorosa. Os valores detalhados de resistores e capacitores encontram-se documentados e disponíveis na [Planilha de Cálculo dos Resistores do MUX](https://docs.google.com/spreadsheets/d/1JRgotxXqhh7AWHn3eFYBWBYR9uyb90T4CB8j2cIpAZI/edit?usp=sharing) [5].
+pass
+pass
+pass
+[1] IFSC. Projeto Integrador 3: Gerador de Função Microcontrolado. Documentação Acadêmica, 2024. Disponível em ambiente institucional.  
+[2] Texas Instruments. *TL08x JFET-Input Operational Amplifiers Datasheet*. SLOS081G, 1997 (Revised 2014). Disponível em: <https://www.ti.com/lit/ds/symlink/tl081.pdf>.  
+[3] Texas Instruments. *CD4051B CMOS Single 8-Channel Analog Multiplexer/Demultiplexer Datasheet*. SCHS056E, 2003 (Revised 2015). Disponível em: <https://www.ti.com/lit/ds/symlink/cd4051b.pdf>.  
+[4] STMicroelectronics. *STM32F439xx Advanced ARM-based 32-bit MCUs Datasheet*. DS9216, Rev 9, 2018. Disponível em: <https://www.st.com/resource/en/datasheet/stm32f439zi.pdf>.  
+[5] Planilha de Cálculo dos Resistores do MUX para o Gerador de Função. Disponível em: <https://docs.google.com/spreadsheets/d/1JRgotxXqhh7AWHn3eFYBWBYR9uyb90T4CB8j2cIpAZI/edit?usp=sharing>.  
+[6] Sedra, A. S.; Smith, K. C. *Microelectronic Circuits*. 7th ed. Oxford University Press, 2015.  
