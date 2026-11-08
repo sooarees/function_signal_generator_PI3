@@ -31,17 +31,26 @@ Após a validação prática, a modelagem matemática demonstrou que, ao adotar 
 
 O esquemático integrado no KiCad foi organizado hierarquicamente em blocos funcionais (`Supply`, `MCU`, `SineFilter`, `TriangularSawtooth`, `Offset_Amplifier` e `Mux`), com documentação disponível em [hardware/README.md](./hardware/README.md). Durante a revisão técnica, identificou-se que o módulo comercial XL6019 [6] opera em topologia SEPIC de terra comum, impossibilitando a geração do barramento negativo de -12 V sem curto-circuito na alimentação. Devido a essa não conformidade e à complexidade da malha de 32 resistores, optou-se tecnicamente por adiar a confecção da placa de circuito impresso (PCB) definitiva para a Etapa 4, assegurando correções seguras de projeto.
 
-## 4. Circuito de geração da tensão de offset
+## 4. Estágio de offset e amplificação de saída
 
-O circuito de offset converte duas tensões unipolares fornecidas pelos DACs do microcontrolador (0 a 3,3 V) em uma única tensão bipolar, na faixa de aproximadamente −5 V a +5 V, utilizada para deslocar o nível DC do sinal de saída do gerador.
+O último bloco analógico do gerador é responsável por duas funções: amplificar o sinal vindo do filtro de reconstrução e somar a ele uma tensão contínua de offset definida pelo usuário. O bloco é dividido em dois estágios:
 
-O circuito é composto por três estágios com amplificadores operacionais TL074, alimentados em ±12 V.
+1. **Geração da tensão de offset:** converte duas tensões unipolares fornecidas pelos DACs do microcontrolador (0 a 3,3 V) em uma tensão bipolar entre aproximadamente −5 V e +5 V.
+2. **Amplificador somador não-inversor:** amplifica o sinal e soma a tensão de offset em um único amplificador operacional, sem inverter a fase da forma de onda.
 
-### 4.1. Buffers de entrada (U3 e U4)
+Todos os amplificadores operacionais são do tipo TL074 (JFET), alimentados em ±12 V. O circuito completo, utilizado na simulação, é mostrado na Figura 1.
 
-Cada saída de DAC passa por um seguidor de tensão de ganho unitário. Esses estágios apresentam alta impedância de entrada e baixa impedância de saída, isolando os DACs da malha resistiva seguinte. Assim, o ganho do circuito não depende da impedância de saída dos conversores e os dois ramos do amplificador diferencial ficam equilibrados.
+![Figura 1 — Circuito de offset e amplificação simulado no LTspice](imagens/fig_offset_amplificador_ltspice.png)
 
-### 4.2. Amplificador diferencial (U5)
+*Figura 1 — Circuito de geração de offset (U3, U4, U5 e U2) e amplificador somador de saída (U1), simulado no LTspice.*
+
+### 4.1. Geração da tensão de offset
+
+#### 4.1.1. Buffers de entrada (U3 e U4)
+
+Cada saída de DAC passa por um seguidor de tensão de ganho unitário. Esses estágios apresentam alta impedância de entrada e baixa impedância de saída, isolando os DACs da malha resistiva seguinte. Assim, o ganho do circuito não depende da impedância de saída dos conversores, e os dois ramos do amplificador diferencial ficam equilibrados. Como os buffers externos cumprem essa função, o buffer interno do DAC do microcontrolador pode ser desabilitado, o que permite utilizar a faixa completa de 0 a 3,3 V.
+
+#### 4.1.2. Amplificador diferencial (U5)
 
 Os resistores R6 e R5 (10 kΩ) e R8 e R7 (15 kΩ) formam um subtrator com ganho diferencial definido pela razão entre eles:
 
@@ -53,11 +62,11 @@ Como cada entrada varia de 0 a 3,3 V, a diferença $V_4 - V_3$ varia de −3,3 V
 
 O uso de resistores iguais nos dois ramos ($R_6 = R_5$ e $R_8 = R_7$) garante o cancelamento da componente comum às duas entradas. O capacitor C1 (47 pF), em paralelo com R8, limita a banda do estágio e evita oscilações de alta frequência, sem afetar a resposta em corrente contínua.
 
-### 4.3. Buffer de saída (U2)
+#### 4.1.3. Buffer de saída (U2)
 
-Um seguidor de tensão entrega a tensão de offset ao estágio somador, garantindo baixa impedância de saída.
+Um seguidor de tensão entrega a tensão de offset ao estágio somador, garantindo baixa impedância de saída. Dessa forma, a tensão de offset não é afetada pela carga representada pelo resistor de entrada do somador.
 
-### 4.4. Operação
+#### 4.1.4. Operação
 
 No firmware, adota-se um DAC para cada polaridade: para offset positivo, ajusta-se $V_4$ e mantém-se $V_3$ em 0 V; para offset negativo, o inverso.
 
@@ -66,17 +75,90 @@ No firmware, adota-se um DAC para cada polaridade: para offset positivo, ajusta-
 | U3, U4 | TL074 (seguidor) | Buffers de entrada dos DACs |
 | R6, R5 | 10 kΩ | Resistores de entrada do subtrator |
 | R8, R7 | 15 kΩ | Resistores de realimentação e de referência (ganho 1,5) |
-| C1 | 47 pF | Limitação de banda / estabilidade |
+| C1 | 47 pF | Limitação de banda e estabilidade |
 | U5 | TL074 | Amplificador diferencial |
-| U2 | TL074 (seguidor) | Buffer de saída |
+| U2 | TL074 (seguidor) | Buffer de saída do offset |
 
-Na simulação apresentada, com $V_3 = 1{,}3\ \text{V}$ e $V_4 = 0\ \text{V}$, a saída esperada é:
+### 4.2. Amplificador somador não-inversor (U1)
+
+O sinal de saída do filtro e a tensão de offset são aplicados, respectivamente, através de R1 (10 kΩ) e R2 (36 kΩ), à entrada não-inversora de U1. Esses dois resistores formam um divisor ponderado, de modo que a tensão na entrada não-inversora é:
+
+$$
+V_{+} = \frac{R_2 \cdot V_{SINAL} + R_1 \cdot V_{OFFSET}}{R_1 + R_2}
+$$
+
+A malha de realimentação, formada por R3 (36 kΩ) e R4 (10 kΩ), define o ganho não-inversor:
+
+$$
+V_{OUT} = \left(1 + \frac{R_3}{R_4}\right) \cdot V_{+}
+$$
+
+Combinando as duas expressões e utilizando $R_1 = R_4 = 10\ \text{k}\Omega$ e $R_2 = R_3 = 36\ \text{k}\Omega$:
+
+$$
+V_{OUT} = \frac{R_3}{R_4} \cdot V_{SINAL} + V_{OFFSET} = 3{,}6 \cdot V_{SINAL} + V_{OFFSET}
+$$
+
+Ou seja, o sinal é amplificado com ganho 3,6, enquanto a tensão de offset é transferida para a saída com ganho unitário. Como a topologia é não-inversora, a forma de onda de saída mantém a mesma fase do sinal de entrada, o que preserva, por exemplo, o sentido da rampa da onda dente de serra.
+
+No projeto da placa, um capacitor de acoplamento de 82 nF é inserido em série com R1. Ele bloqueia o nível DC de aproximadamente 1,65 V presente na saída do DAC, que de outra forma seria multiplicado pelo ganho e deslocaria a saída. Com a resistência vista pelo capacitor ($R_1 + R_2 = 46\ \text{k}\Omega$), a frequência de corte inferior resultante é:
+
+$$
+f_c = \frac{1}{2\pi \cdot 46\ \text{k}\Omega \cdot 82\ \text{nF}} \approx 42\ \text{Hz}
+$$
+
+bem abaixo da menor frequência de operação do gerador.
+
+| Componente | Valor | Função |
+|---|---|---|
+| R1 | 10 kΩ | Entrada do sinal |
+| R2 | 36 kΩ | Entrada do offset |
+| R3 | 36 kΩ | Realimentação |
+| R4 | 10 kΩ | Realimentação para o GND |
+| C de acoplamento | 82 nF | Bloqueio do nível DC do sinal (placa final) |
+| U1 | TL074 | Amplificador somador não-inversor |
+
+**Limite de excursão.** No pior caso, um sinal de ±1,65 V multiplicado por 3,6 (±5,9 V), somado a um offset de ±4,95 V, resulta em cerca de ±10,9 V, próximo ao limite de saída do TL074 alimentado em ±12 V. Por isso, o firmware deve limitar a combinação de amplitude e offset para evitar a saturação do amplificador.
+
+### 4.3. Simulação
+
+Na simulação da Figura 1, a fonte V5 representa o sinal filtrado (senoide de 1 V de pico, 1 kHz), e as fontes V3 = 1,3 V e V4 = 0 V representam as saídas dos DACs. A tensão de offset esperada é:
 
 $$
 V_{OFFSET} = 1{,}5 \cdot (0 - 1{,}3) = -1{,}95\ \text{V}
 $$
 
-A tensão de offset é então somada ao sinal no amplificador de saída, deslocando o nível DC da forma de onda gerada conforme o valor definido pelo usuário na interface.
+e a saída esperada é uma senoide de $3{,}6 \cdot 1 = 3{,}6\ \text{V}$ de pico, centrada em −1,95 V.
+
+### 4.4. Resultados em bancada
+
+O circuito foi montado em protoboard, conforme a Figura 2, e alimentado com fonte simétrica de ±12 V. Como sinal de entrada, utilizou-se um gerador de funções com senoide de aproximadamente 2,08 V pico a pico e 4,5 kHz. Nas medições, o canal 1 (amarelo) corresponde ao sinal de entrada e o canal 2 (azul) à saída do amplificador.
+
+![Figura 2 — Montagem do circuito em protoboard](imagens/fig_montagem_protoboard.jpg)
+
+*Figura 2 — Montagem em protoboard dos estágios de offset e amplificação.*
+
+As Figuras 3, 4 e 5 mostram a saída para três valores de offset: negativo, positivo e nulo. Em todos os casos, a amplitude de saída é de 6,56 V pico a pico, e apenas o nível DC da forma de onda é deslocado, o que confirma o funcionamento independente das duas entradas do somador.
+
+![Figura 3 — Saída com offset negativo](imagens/fig_osc_offset_negativo.jpg)
+
+*Figura 3 — Saída com offset negativo (aproximadamente −2 V). CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.*
+
+![Figura 4 — Saída com offset positivo](imagens/fig_osc_offset_positivo.jpg)
+
+*Figura 4 — Saída com offset positivo (aproximadamente +2 V). CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.*
+
+![Figura 5 — Saída com offset nulo](imagens/fig_osc_offset_zero.jpg)
+
+*Figura 5 — Saída com offset nulo. CH1: 1 V/div; CH2: 2 V/div; base de tempo: 100 µs/div.*
+
+O ganho medido do sinal foi:
+
+$$
+G_{medido} = \frac{6{,}56\ \text{V}_{pp}}{2{,}08\ \text{V}_{pp}} \approx 3{,}15
+$$
+
+valor cerca de 12 % abaixo do ganho teórico de 3,6. As causas prováveis são a tolerância dos resistores utilizados na montagem e a imprecisão da medida automática de pico a pico do osciloscópio, que inclui o ruído do sinal. Recomenda-se conferir os valores de R1 a R4 com multímetro e, se necessário, corrigir o ganho por calibração no firmware. Os valores de offset indicados nas legendas foram estimados a partir da posição das formas de onda em relação à referência de 0 V do canal 2.
 
 ## Testes
 
