@@ -22,13 +22,27 @@ O módulo `signal_control` mantém o estado oficial do gerador, valida os limite
 
 ### Display, touch e interface
 
+A Figura 1 mostra a montagem da placa NUCLEO-F439ZI com o display resistivo em funcionamento.
+
+<p align="center">
+  <img src="../../images/Etapa03_Firmware_PlataformaIntegrada.png" alt="Placa NUCLEO-F439ZI com o display do gerador em funcionamento" width="300">
+</p>
+<p align="center"><em>Figura 1 — Placa NUCLEO-F439ZI com o display touchscreen.</em></p>
+
 O driver do display configura o barramento paralelo, inicializa o RM68090 e fornece operações para cores, linhas, retângulos, texto e orientação. O touch resistivo, cuja implementação tomou como referência a Adafruit TouchScreen [7], utiliza o ADC1 nos canais 10 e 13 e compartilha alguns pinos com o LCD. Depois de cada leitura do toque, esses pinos são restaurados para a função de saída do display. O touch é consultado aproximadamente a cada 10 ms, mas a tela é redesenhada somente quando há mudança de estado, evitando atualizações completas desnecessárias.
 
-A interface permite selecionar senoide, quadrada, triangular ou dente de serra e editar frequência, amplitude, offset e duty cycle. Durante a edição, os valores permanecem em um rascunho: Salvar aplica a nova configuração e Cancelar descarta as alterações. A escolha da forma de onda é aplicada imediatamente. O duty cycle aparece apenas para a onda quadrada.
+A tela principal, mostrada na Figura 2, reúne as quatro formas de onda e os controles de frequência, amplitude, offset e duty cycle. A escolha da forma de onda é aplicada imediatamente.
+
+<p align="center">
+  <img src="../../images/Etapa03_Interface_TelaInicial.png" alt="Tela principal do gerador com quatro formas de onda e campos de frequência, amplitude, offset e duty cycle" width="400">
+</p>
+<p align="center"><em>Figura 2 — Tela principal do gerador, com a senoide selecionada.</em></p>
+
+Ao tocar em um parâmetro, o usuário pode alterar o valor com o controle deslizante ou com os botões **+** e **−**. O botão **Salvar** confirma o novo valor e **Cancelar** preserva o valor anterior. O duty cycle só pode ser ajustado quando a onda quadrada está selecionada.
 
 ### Geração dos sinais
 
-A saída digital-analógica utiliza o DAC1, canal 1, no pino PA4. A senoide é formada a partir de uma tabela mestra com 250 amostras normalizadas. O firmware seleciona automaticamente 250, 125, 50, 25 ou 10 pontos, respeitando o teto conservador de 200 mil amostras por segundo. Esse valor foi definido para a implementação por interrupção, sem DMA, e não representa o limite físico absoluto do DAC.
+A saída digital-analógica utiliza o DAC1, canal 1, no pino PA4. A senoide é formada a partir de uma tabela mestra com 250 amostras normalizadas. O firmware seleciona automaticamente 250, 125, 50, 25 ou 10 pontos por período. O teto de 200 mil amostras por segundo foi adotado para a implementação por interrupção, sem DMA.
 
 | Frequência configurada | Pontos utilizados |
 |:--|--:|
@@ -53,7 +67,38 @@ Esse teste verifica somente a saída bruta do DAC. Ele não mede o amplificador 
 
 Os testes distinguiram os protótipos intermediários da versão final integrada. Uma primeira senoide fixa de 1 kHz, com 10 pontos e faixa planejada próxima de 0,5 V a 2,5 V, foi observada no osciloscópio com aproximadamente 2,2 Vpp. Outros projetos isolados avaliaram 1 kHz com 25 e 250 pontos, 500 Hz com 250 pontos e 20 kHz com 20 pontos. Este último resultado pertence ao protótipo fixo; no firmware adaptativo final, 20 kHz utiliza 10 pontos.
 
-Na versão integrada, o autoteste foi executado com senoide de 1 kHz e amplitude indicada de 1,0 Vpp. Considerando o ganho externo modelado de 3,5 vezes, eram esperados aproximadamente 286 mVpp em PA4. O ADC2 registrou mínimo de 1,444 V, máximo de 1,749 V, média próxima de 1,595 V e amplitude de 305 mVpp, com frequência estimada em aproximadamente 1 kHz. O firmware classificou o ensaio como aprovado.
+Em outra medição da senoide de 1 kHz, o painel de medidas do osciloscópio indicou 999,0 Hz e 2,82 Vpp, como mostra a Figura 3.
+
+<p align="center">
+  <img src="../../images/Etapa03_Firmware_Senoide1kHz.jpeg" alt="Osciloscópio com senoide de 999,0 Hz e 2,82 Vpp" width="380">
+</p>
+<p align="center"><em>Figura 3 — Senoide de 1 kHz observada no osciloscópio.</em></p>
+
+A Figura 4 registra a senoide discretizada de 20 kHz. Os degraus da saída são visíveis e o osciloscópio indica 20,03 kHz e 2,86 Vpp.
+
+<p align="center">
+  <img src="../../images/Etapa03_Firmware_Senoide20kHz.png" alt="Osciloscópio com senoide em degraus, 20,03 kHz e 2,86 Vpp" width="380">
+</p>
+<p align="center"><em>Figura 4 — Senoide discretizada de 20 kHz observada no osciloscópio.</em></p>
+
+A Figura 5 mostra a onda quadrada gerada pelo DAC, com leitura de 1,000 kHz e 2,92 Vpp no osciloscópio.
+
+<p align="center">
+  <img src="../../images/Etapa03_Firmware_Quadrada1kHz.png" alt="Osciloscópio com onda quadrada gerada pelo DAC, 1,000 kHz e 2,92 Vpp" width="380">
+</p>
+<p align="center"><em>Figura 5 — Onda quadrada de 1 kHz gerada pelo DAC.</em></p>
+
+No autoteste da versão integrada, a interface foi configurada para uma senoide de 1 kHz e 1,0 Vpp. Com o ganho externo de 3,5 adotado pelo firmware, a amplitude esperada em PA4 era de aproximadamente 286 mVpp. A tabela reúne os valores obtidos pelo ADC2 em PA4.
+
+| Medida do autoteste | Valor registrado |
+|:--|--:|
+| Tensão mínima | 1,444 V |
+| Tensão máxima | 1,749 V |
+| Tensão média | Aproximadamente 1,595 V |
+| Amplitude pico a pico | 305 mVpp |
+| Frequência estimada | Aproximadamente 1 kHz |
+
+O firmware classificou o ensaio como aprovado.
 
 | Validação | Resultado | Evidência ou observação |
 |:--|:-:|:--|
@@ -62,7 +107,10 @@ Na versão integrada, o autoteste foi executado com senoide de 1 kHz e amplitude
 | Display RM68090 no STM32 | Aprovado | Cores, linhas, texto e orientação |
 | Touch resistivo | Aprovado | Navegação e botões operacionais |
 | Salvar e Cancelar | Aprovado | Saída alterada somente após confirmação |
-| Senoide fixa de 1 kHz | Aprovado | Sinal observado no osciloscópio |
+| Protótipo com senoide fixa de 1 kHz | Aprovado | Aproximadamente 2,2 Vpp no osciloscópio |
+| Senoide de 1 kHz registrada em foto | Observada em bancada | 999,0 Hz e 2,82 Vpp no osciloscópio |
+| Senoide discretizada de 20 kHz | Observada em bancada | 20,03 kHz e 2,86 Vpp no osciloscópio |
+| Onda quadrada de 1 kHz pelo DAC | Observada em bancada | 1,000 kHz e 2,92 Vpp no osciloscópio |
 | Variação da quantidade de pontos | Protótipo aprovado | Ensaios com 10, 25 e 250 pontos |
 | Controle de frequência e amplitude | Aprovado | Alteração durante a execução |
 | Integração FreeRTOS, display, touch e DAC | Aprovado | Execução simultânea sem travamento observado |

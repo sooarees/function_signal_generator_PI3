@@ -63,7 +63,7 @@ O somador não inversor utiliza resistores de 10 kΩ e 36 kΩ. A relação teór
 
 O projeto inclui um capacitor de acoplamento de 82 nF em série com a entrada do sinal. Com resistência equivalente de 46 kΩ, a frequência de corte calculada é próxima de 42 Hz. Como esse valor é superior ao limite inferior pretendido de 1 Hz, a combinação não atende toda a faixa especificada e precisa ser revista antes da integração final. O capacitor bloqueia a componente contínua de aproximadamente 1,65 V presente na saída do DAC, mas também atenua sinais de baixa frequência.
 
-O circuito foi montado em protoboard e alimentado em ±12 V, conforme mostra a Figura 6. O ensaio utilizou uma senoide de aproximadamente 2,08 Vpp e 4,5 kHz proveniente de um gerador de funções de laboratório.
+A Figura 6 mostra o circuito montado em protoboard. Para o ensaio, a montagem recebeu alimentação de bancada de ±12 V e uma senoide de aproximadamente 2,08 Vpp a 4,5 kHz, fornecida por um gerador de funções de laboratório.
 
 <p align="center">
   <img src="../../images/Etapa03_OffsetAmplificador_Bancada.jpeg" alt="Montagem do circuito de offset e amplificação em protoboard" width="400">
@@ -103,7 +103,7 @@ O projeto foi organizado em folhas hierárquicas no KiCad. A folha principal est
 | `Offset_Amplifier.kicad_sch` | Geração do offset e amplificação |
 | `Mux.kicad_sch` | Seleção analógica da forma de onda |
 
-O esquemático consolida as conexões e os componentes estudados, mas não deve ser interpretado como uma placa definitiva fabricada. A fabricação da PCB foi adiada e os blocos foram avaliados separadamente em protoboard.
+O esquemático consolida as conexões e os componentes estudados. Os ensaios desta etapa foram feitos em protoboard, com os blocos separados.
 
 ### Gabinete
 
